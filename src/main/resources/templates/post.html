@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Название страницы-->
+    <title>Лента</title>
+
+    <!-- Стили страницы -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .actions {
+            text-align: center;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"], input[type="checkbox"] {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .btn-add {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Пост c id = "</h1>
+<table>
+    <tbody>
+    <tr>
+        <th>id</th>
+        <td th:text="${postDao.id}"/>
+    </tr>
+    <tr>
+        <th>Название</th>
+        <td th:text="${postDao.name}"/>
+    </tr>
+    <tr>
+        <th>Картинка</th>
+        <!--<td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>-->
+    </tr>
+    <tr>
+        <th>Текст</th>
+        <td th:text="${postDao.text}"/>
+    </tr>
+    <tr>
+        <th>Количество комментариев</th>
+        <td th:text="${#lists.size(postDao.comments)}"/>
+    </tr>
+    <tr>
+        <th>Количество лайков</th>
+        <td th:text="${postDao.numberOfLikes}"/>
+    </tr>
+    <tr>
+        <th>Теги</th>
+        <td th:text="${postDao.tags}"/>
+    </tr>
+    <td>
+        <form th:action="@{/feed/{id}(id=${postDao.id})}" method="post" style="display:inline;">
+            <input type="hidden" name="_method" value="delete">
+            <button type="submit">Удалить пост</button>
+        </form>
+    </td>
+    </tbody>
+</table>
+<a th:href="@{/feed}" th:text="@{Вернуться на главную}"></a>
+
+
+</body>
+</html>
