@@ -4,21 +4,22 @@ import ru.yandex.practicum.dao.PostDao;
 import ru.yandex.practicum.model.Post;
 
 import java.io.*;
+import java.util.Base64;
 
 public class PostMapper {
     private PostMapper() {
     }
 
     public static PostDao mapToPostDao(Post post) throws IOException {
-/*        byte[] bytes = post.getFile().getBytes();
-        String imageBase64 = Base64.getEncoder().encodeToString(bytes);*/
+        byte[] bytes = post.getFile().getBytes();
+        String imageBase64 = Base64.getEncoder().encodeToString(bytes);
 
         return new PostDao(
-                0,
+                post.getId(),
                 post.getName(),
-                /*imageBase64,*/
+                imageBase64,
                 post.getText(),
                 0,
-                post.getTags());
+                post.getTagsString());
     }
 }

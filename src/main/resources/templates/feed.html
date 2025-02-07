@@ -56,7 +56,11 @@
 </head>
 <body>
 <h1>Посты</h1>
+<a th:href="@{/feed}" th:text="@{На главную}"></a>
+<br>
 <button class="btn-add" onclick="toggleForm()">Добавить пост</button>
+<button class="btn-add" onclick="toggleForm2()">Поиск по тегу</button>
+
 <table th:each="postDao : ${feed}">
     <tbody>
     <tr>
@@ -65,14 +69,13 @@
     </tr>
     <tr>
         <th>Название</th>
-        <!--<td th:text="${postDao.name}"/>-->
         <td>
-            <a th:href="@{/feed/post/{id}(id=${postDao.id})}" th:text="${postDao.name}" target="_blank"></a>
+            <a th:href="@{/feed/post/{id}(id=${postDao.id})}" th:text="${postDao.name}"></a>
         </td>
     </tr>
     <tr>
         <th>Картинка</th>
-        <!--<td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>-->
+        <td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>
     </tr>
     <tr>
         <th>Превью</th>
@@ -80,7 +83,7 @@
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDao.comments)}"/>
+        <td th:text="${#lists.size(postDao.commentsList)}"/>
     </tr>
     <tr>
         <th>Количество лайков</th>
@@ -88,7 +91,7 @@
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDao.tags}"/>
+        <td th:text="${postDao.tagsTextList}"/>
     </tr>
     <tr>
         <td>
@@ -101,23 +104,33 @@
     </tbody>
 </table>
 
+
 <!-- Скрываемая форма для добавления нового поста -->
 <div class="form-container" style="display: none;" id="postForm">
     <h2>Добавить пост</h2>
-    <form th:action="@{/feed}" method="POST" th:object="${post}">
+    <form th:action="@{/feed}" method="POST" th:object="${post}" enctype="multipart/form-data">
         <label for="name">Название:</label>
         <input type="text" id="name" name="name" required>
 
-        <!--        <label for="file">Прикрепите картинку:</label>
-                <input type="file" id="file" name="file" accept="image/*" class="form-control-file"
-                       enctype="multipart/form-data" required>
-                <button type="submit">Загрузить</button>-->
+        <label for="file">Прикрепите картинку:</label>
+        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+        <button type="submit">Загрузить</button>
 
         <label for="text">Текст:</label>
         <input type="text" id="text" name="text" required>
-        <label for="tags">Теги:</label>
+        <label for="tags">Теги (ввод - через запятую):</label>
         <input type="text" id="tags" name="tags" required>
         <button type="submit">Добавить</button>
+    </form>
+</div>
+
+<!-- Скрываемая форма для поиска по тегам -->
+<div class="form-container" style="display: none;" id="getFeedWithChosenTags">
+    <h2>Поиск по тегам</h2>
+    <h3>(добавьте в ячейку теги через запятую)</h3>
+    <form th:action="@{/feed/tags/}">
+        <input type="text" th:name="tagsString"/>
+        <button type="submit">Найти</button>
     </form>
 </div>
 
@@ -127,5 +140,12 @@
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
 </script>
+<script>
+    function toggleForm2() {
+    const form = document.getElementById('getFeedWithChosenTags');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
 </body>
 </html>

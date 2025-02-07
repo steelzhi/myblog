@@ -20,9 +20,15 @@ public class PostController {
     @GetMapping
     public String getFeed(Model model) {
         List<PostDao> feed = postService.getSortedFeed();
-/*      feed.add(new PostDao(1, "AA", "bb", "bb", "bb"));
-        feed.add(new PostDao(2, "CC", "dd", "dd", "dd"));*/
         model.addAttribute("feed", feed);
+
+        return "feed";
+    }
+
+    @GetMapping("/tags/")
+    public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) {
+        List<PostDao> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
+        model.addAttribute("feed", feedWithChosenTags);
 
         return "feed";
     }
@@ -31,6 +37,22 @@ public class PostController {
     public String addPost(@ModelAttribute Post post) throws IOException {
         postService.addPost(post);
         return "redirect:/feed";
+    }
+
+    @PostMapping("/post/change/{id}")
+    public String changePost(@ModelAttribute Post post, @PathVariable(name = "id") Integer id) throws IOException {
+        post.setId(id);
+        postService.changePost(post);
+
+        return "redirect:/feed/post/" + id;
+    }
+
+    @PostMapping("/post/addLike/{id}")
+    public String addLike(@PathVariable(name = "id") Integer id) throws IOException {
+        postService.addLike(id);
+        PostDao postDao = postService.getPostById(Long.valueOf(id));
+
+        return "redirect:/feed/post/" + id;
     }
 
     @PostMapping(value = "/{id}", params = "_method=delete")

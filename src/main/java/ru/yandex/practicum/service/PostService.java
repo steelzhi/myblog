@@ -20,8 +20,20 @@ public class PostService {
         return postRepository.getSortedFeed();
     }
 
+    public List<PostDao> getFeedWithChosenTags(String tagsString) {
+        return postRepository.getFeedWithChosenTags(tagsString);
+    }
+
     public void addPost(Post post) throws IOException {
-        postRepository.addPost(PostMapper.mapToPostDao(post));
+        postRepository.addPostDao(PostMapper.mapToPostDao(post));
+    }
+
+    public void changePost(Post changedPost) throws IOException {
+        postRepository.changePost(PostMapper.mapToPostDao(changedPost));
+    }
+
+    public void addLike(Integer id) {
+        postRepository.addLike(id);
     }
 
     public void deletePost(Long id) {

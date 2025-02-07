@@ -13,21 +13,28 @@ import java.util.List;
 public class PostDao {
     private int id;
     private String name;
-    /*    private String base64Image;*/
+    private String base64Image;
     private String preview;
     private String text;
     private int numberOfLikes;
-    private String tags;
-    private List<String> comments = new ArrayList<>();
+    private List<String> tagsTextList = new ArrayList<>();
+    private List<String> commentsList = new ArrayList<>();
     private static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
 
-    public PostDao(int id, String name, /*String base64Image,*/ String text, int numberOfLikes, String tags) {
+    public PostDao(int id, String name, String base64Image, String text, int numberOfLikes, String tagsString) {
         this.id = id;
         this.name = name;
-        /*        this.base64Image = base64Image;*/
+        this.base64Image = base64Image;
         this.text = text;
-        this.numberOfLikes = 0;
-        this.tags = tags;
+        this.numberOfLikes = numberOfLikes;
+
+        if (tagsString != null) {
+            String[] tagsTextArray = tagsString.replaceAll(" ", "").split(",");
+            for (String tagText : tagsTextArray) {
+                tagsTextList.add(tagText);
+            }
+        }
+
         this.preview = getPreview();
     }
 

@@ -55,7 +55,7 @@
     </style>
 </head>
 <body>
-<h1>Пост c id = "</h1>
+<h1>Пост c id = " + </h1>
 <table>
     <tbody>
     <tr>
@@ -68,7 +68,7 @@
     </tr>
     <tr>
         <th>Картинка</th>
-        <!--<td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>-->
+        <td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>
     </tr>
     <tr>
         <th>Текст</th>
@@ -76,7 +76,7 @@
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDao.comments)}"/>
+        <td th:text="${#lists.size(postDao.commentsList)}"/>
     </tr>
     <tr>
         <th>Количество лайков</th>
@@ -84,7 +84,7 @@
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDao.tags}"/>
+        <td th:text="${postDao.tagsTextList}"/>
     </tr>
     <td>
         <form th:action="@{/feed/{id}(id=${postDao.id})}" method="post" style="display:inline;">
@@ -92,10 +92,40 @@
             <button type="submit">Удалить пост</button>
         </form>
     </td>
+    <td>
+        <form th:action="@{/feed/post/addLike/{id}(id=${postDao.id})}" method="POST">
+            <input type="hidden">
+            <button type="submit">Поставить лайк</button>
+        </form>
+    </td>
     </tbody>
 </table>
+
+<button class="btn-add" onclick="toggleForm()">Редактировать пост</button>
+<div class="form-container" style="display: none;" id="changeForm" >
+    <h2>Редактировать пост</h2>
+    <form th:action="@{/feed/post/change/{id}(id=${postDao.id})}" method="POST" th:object="${post}" enctype="multipart/form-data">
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="file">Прикрепите картинку:</label>
+        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+        <button type="submit">Загрузить</button>
+        <label for="text">Текст:</label>
+        <input type="text" id="text" name="text" required>
+        <label for="tagsString">Теги:</label>
+        <input type="text" id="tagsString" name="tagsString" required>
+        <button type="submit">Заменить</button>
+    </form>
+</div>
+
 <a th:href="@{/feed}" th:text="@{Вернуться на главную}"></a>
 
+<script>
+    function toggleForm() {
+        const form = document.getElementById('changeForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
 
 </body>
 </html>
