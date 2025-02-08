@@ -3,6 +3,7 @@ package ru.yandex.practicum.dao;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.yandex.practicum.model.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public class PostDao {
     private String text;
     private int numberOfLikes;
     private List<String> tagsTextList = new ArrayList<>();
-    private List<String> commentsList = new ArrayList<>();
+    private List<Comment> commentsList = new ArrayList<>();
     private static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
 
     public PostDao(int id, String name, String base64Image, String text, int numberOfLikes, String tagsString) {
@@ -31,7 +32,12 @@ public class PostDao {
         if (tagsString != null) {
             String[] tagsTextArray = tagsString.replaceAll(" ", "").split(",");
             for (String tagText : tagsTextArray) {
-                tagsTextList.add(tagText);
+                if (tagText.startsWith("#")) {
+                    tagsTextList.add(tagText);
+
+                } else {
+                    tagsTextList.add("#" + tagText);
+                }
             }
         }
 

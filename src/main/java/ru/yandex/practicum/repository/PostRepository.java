@@ -19,6 +19,7 @@ public interface PostRepository {
             null);
 
     RowMapper<Comment> MAP_TO_COMMENTS = (ResultSet resultSet, int rowNum) -> new Comment(
+            resultSet.getInt("id"),
             resultSet.getInt("post_id"),
             resultSet.getString("text"));
 
@@ -44,19 +45,13 @@ public interface PostRepository {
             resultSet.getInt("tag_id"));
 
     void addPostDao(PostDao postDao);
-
-    List<PostDao> getSortedFeed();
-
-    public List<PostDao> getFeedWithChosenTags(String tagsString);
-
-    void deletePost(Long id);
-
-    PostDao getPostById(Long id);
-
-    void changePost(PostDao newPostDao);
-
     void addLike(int postDaoId);
-
-    /*    public List<PostDao> findByTags(String[] tags);*/
-
+    void addComment(int postId, String commentText);
+    List<PostDao> getSortedFeed();
+    List<PostDao> getFeedWithChosenTags(String tagsString);
+    PostDao getPostById(Long id);
+    List<PostDao> getFeedSplittedByPages(int postsOnPage, int pageNumber);
+    void changePost(PostDao newPostDao);
+    void deletePost(Long id);
+    void deleteComment(Long postDaoId, Long commentId);
 }

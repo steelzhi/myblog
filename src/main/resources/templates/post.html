@@ -55,13 +55,9 @@
     </style>
 </head>
 <body>
-<h1>Пост c id = " + </h1>
+<h1 th:text="'Пост с id = ' + ${postDao.id}"></h1>
 <table>
     <tbody>
-    <tr>
-        <th>id</th>
-        <td th:text="${postDao.id}"/>
-    </tr>
     <tr>
         <th>Название</th>
         <td th:text="${postDao.name}"/>
@@ -75,36 +71,55 @@
         <td th:text="${postDao.text}"/>
     </tr>
     <tr>
+        <th>Теги</th>
+        <td th:text="${postDao.tagsTextList}"/>
+    </tr>
+    <tr>
         <th>Количество комментариев</th>
         <td th:text="${#lists.size(postDao.commentsList)}"/>
+    </tr>
+    <tr th:each="comment : ${postDao.commentsList}">
+        <th>Комментарий</th>
+        <td contenteditable="true" th:text="${comment.text}"/>
+        <td>
+            <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDao.id}, commentId=${comment.id})}"
+                  method="post" style="display:inline;">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">Удалить комментарий</button>
+            </form>
+        </td>
     </tr>
     <tr>
         <th>Количество лайков</th>
         <td th:text="${postDao.numberOfLikes}"/>
     </tr>
-    <tr>
-        <th>Теги</th>
-        <td th:text="${postDao.tagsTextList}"/>
-    </tr>
-    <td>
-        <form th:action="@{/feed/{id}(id=${postDao.id})}" method="post" style="display:inline;">
-            <input type="hidden" name="_method" value="delete">
-            <button type="submit">Удалить пост</button>
-        </form>
-    </td>
-    <td>
-        <form th:action="@{/feed/post/addLike/{id}(id=${postDao.id})}" method="POST">
-            <input type="hidden">
-            <button type="submit">Поставить лайк</button>
-        </form>
-    </td>
     </tbody>
 </table>
 
+<form th:action="@{/feed/post/{id}/addLike(id=${postDao.id})}" method="POST">
+    <input type="hidden">
+    <button type="submit">Поставить лайк</button>
+</form>
+<br>
+
+<button class="btn-add" onclick="toggleForm2()">Добавить комментарий</button>
+<div class="form-container" style="display: none;" id="addComment">
+    <h2>Добавить комментарий</h2>
+    <form th:action="@{/feed/post/addComment/{id}(id=${postDao.id})}" method="POST"
+          th:object="${comment}">
+        <input type="hidden">
+        <label for="text">Текст:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Добавить комментарий</button>
+    </form>
+</div>
+<br>
+
 <button class="btn-add" onclick="toggleForm()">Редактировать пост</button>
-<div class="form-container" style="display: none;" id="changeForm" >
+<div class="form-container" style="display: none;" id="changeForm">
     <h2>Редактировать пост</h2>
-    <form th:action="@{/feed/post/change/{id}(id=${postDao.id})}" method="POST" th:object="${post}" enctype="multipart/form-data">
+    <form th:action="@{/feed/post/{id}/change(id=${postDao.id})}" method="POST" th:object="${post}"
+          enctype="multipart/form-data">
         <label for="name">Название:</label>
         <input type="text" id="name" name="name" required>
         <label for="file">Прикрепите картинку:</label>
@@ -117,12 +132,27 @@
         <button type="submit">Заменить</button>
     </form>
 </div>
+<br>
 
+<form th:action="@{/feed/post/{id}(id=${postDao.id})}" method="post" style="display:inline;">
+    <input type="hidden" name="_method" value="delete">
+    <button type="submit">Удалить пост</button>
+</form>
+
+<br>
+<br>
 <a th:href="@{/feed}" th:text="@{Вернуться на главную}"></a>
 
 <script>
     function toggleForm() {
         const form = document.getElementById('changeForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<script>
+    function toggleForm2() {
+        const form = document.getElementById('addComment');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
 </script>

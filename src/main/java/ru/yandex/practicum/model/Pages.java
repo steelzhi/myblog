@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
-    private int id;
-    private int postId;
-    private String text;
+public class Pages {
+    private int postsOnPage;
+    private int numberOfPages;
 }

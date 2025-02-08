@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,14 +59,36 @@
 <a th:href="@{/feed}" th:text="@{На главную}"></a>
 <br>
 <button class="btn-add" onclick="toggleForm()">Добавить пост</button>
+<!-- Скрываемая форма для добавления нового поста -->
+<div class="form-container" style="display: none;" id="postForm">
+    <h2>Добавить пост</h2>
+    <form th:action="@{/feed}" method="POST" th:object="${post}" enctype="multipart/form-data">
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="file">Прикрепите картинку:</label>
+        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+        <!--<button type="submit">Загрузить</button>-->
+        <label for="text">Текст:</label>
+        <input type="text" id="text" name="text" required>
+        <label for="tagsString">Теги (ввод - через запятую):</label>
+        <input type="text" id="tagsString" name="tagsString" required>
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+
 <button class="btn-add" onclick="toggleForm2()">Поиск по тегу</button>
+<!-- Скрываемая форма для поиска по тегам -->
+<div class="form-container" style="display: none;" id="getFeedWithChosenTags">
+    <h2>Поиск по тегам</h2>
+    <h3>(добавьте в ячейку теги через запятую)</h3>
+    <form th:action="@{/feed/tags/}">
+        <input type="text" th:name="tagsString"/>
+        <button type="submit">Найти</button>
+    </form>
+</div>
 
 <table th:each="postDao : ${feed}">
     <tbody>
-    <tr>
-        <th>id</th>
-        <td th:text="${postDao.id}"/>
-    </tr>
     <tr>
         <th>Название</th>
         <td>
@@ -104,35 +126,57 @@
     </tbody>
 </table>
 
+<form th:action="@{/feed/pages}">
+    <input type="hidden" name="postsOnPage" value="2">
+    <input type="hidden" name="pageNumber" value="1">
+    <button type="submit">Показывать по 2 поста</button>
+</form>
 
-<!-- Скрываемая форма для добавления нового поста -->
-<div class="form-container" style="display: none;" id="postForm">
-    <h2>Добавить пост</h2>
-    <form th:action="@{/feed}" method="POST" th:object="${post}" enctype="multipart/form-data">
-        <label for="name">Название:</label>
-        <input type="text" id="name" name="name" required>
+<form th:action="@{/feed/pages}">
+    <input type="hidden" name="postsOnPage" value="3">
+    <input type="hidden" name="pageNumber" value="1">
+    <button type="submit">Показывать по 3 поста</button>
+</form>
 
-        <label for="file">Прикрепите картинку:</label>
-        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
-        <button type="submit">Загрузить</button>
+<form th:action="@{/feed/pages}">
+    <input type="hidden" name="postsOnPage" value="5">
+    <input type="hidden" name="pageNumber" value="1">
+    <button type="submit">Показывать по 5 постов</button>
+</form>
 
-        <label for="text">Текст:</label>
-        <input type="text" id="text" name="text" required>
-        <label for="tags">Теги (ввод - через запятую):</label>
-        <input type="text" id="tags" name="tags" required>
-        <button type="submit">Добавить</button>
-    </form>
-</div>
+<br>
+<span>Страницы</span>
+<br>
 
-<!-- Скрываемая форма для поиска по тегам -->
-<div class="form-container" style="display: none;" id="getFeedWithChosenTags">
-    <h2>Поиск по тегам</h2>
-    <h3>(добавьте в ячейку теги через запятую)</h3>
-    <form th:action="@{/feed/tags/}">
-        <input type="text" th:name="tagsString"/>
-        <button type="submit">Найти</button>
-    </form>
-</div>
+<table th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
+    <tbody>
+    <tr>
+        <th>Страница</th>
+        <td>
+            <!--            <input type="hidden" name="postsOnPage" th:value="${pages.postsOnPage}">
+                        <input type="hidden" name="pageNumber" th:value="${i}">-->
+            <a th:href="@{/feed/pages}" th:text="${i}"></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!--<p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
+<p th:text="${i}"></p>
+&lt;!&ndash;<input type="hidden" name="postsOnPage" value="${pages.postsOnPage}">
+<input type="hidden" name="pageNumber" value="${i}">
+<a th:href="@{/feed/pages}"></a>&ndash;&gt;
+</p>-->
+
+<!--<tr th:each="page : ${pages}">
+    <td>
+        <th th:text=${page}></th>
+<a th:href="@{/feed/post/{id}(id=${postDao.id})}" th:text="${postDao.name}"></a>
+
+    </td>
+</tr>-->
+
+<!--<span th:text="${pages} ? ${pages.numberOfPages}: '1'">pages</span>-->
 
 <script>
     function toggleForm() {

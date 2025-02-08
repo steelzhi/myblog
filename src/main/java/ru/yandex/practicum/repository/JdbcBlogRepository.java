@@ -37,25 +37,6 @@ public class JdbcBlogRepository implements PostRepository {
     }
 
     @Override
-    public void changePost(PostDao changedPostDao) {
-        jdbcTemplate.update("""
-                DELETE FROM posts_tags
-                WHERE post_id = ?
-                """, changedPostDao.getId());
-
-        jdbcTemplate.update(
-                """
-                        UPDATE posts 
-                        SET name = ?, base_64_image = ?, text = ?
-                        WHERE id = ?
-                        """,
-                changedPostDao.getName(), changedPostDao.getBase64Image(), changedPostDao.getText(), changedPostDao.getId());
-
-        addNewTags(changedPostDao);
-        System.out.println();
-    }
-
-    @Override
     public void addLike(int postDaoId) {
         jdbcTemplate.update(
                 """
@@ -68,6 +49,12 @@ public class JdbcBlogRepository implements PostRepository {
     }
 
     @Override
+    public void addComment(int postId, String commentText) {
+        jdbcTemplate.update("INSERT INTO comments (post_id, text) VALUES (?, ?)", postId, commentText);
+
+    }
+
+    @Override
     public List<PostDao> getSortedFeed() {
         List<PostDao> postDaosList = jdbcTemplate.query(
                 """
@@ -75,38 +62,11 @@ public class JdbcBlogRepository implements PostRepository {
                         FROM posts p
                         ORDER BY id DESC
                         """, MAP_TO_POSTDAO);
-        Map<Integer, PostDao> postDaosMap = postDaosList.stream()
-                .collect(Collectors.toMap(PostDao::getId, postDao -> postDao));
-
-        addCommentsToPostDaos(postDaosMap);
-        addTagsToPostDaos(postDaosMap);
-
-        return new ArrayList<>(postDaosMap.values());
-    }
-
-    private void addTagsToPostDaos(Map<Integer, PostDao> postDaosMap) {
-        Map<Integer, String> tagsMap = getTagsMap();
-        List<PostTag> postsTagsList = getPostsTagsList();
-        for (PostTag pt : postsTagsList) {
-            if (postDaosMap.containsKey(pt.getPostId())) {
-                postDaosMap.get(pt.getPostId()).getTagsTextList().add(tagsMap.get(pt.getTagId()));
-            }
-        }
-    }
-
-    private void addCommentsToPostDaos(Map<Integer, PostDao> postDaosMap) {
-        Map<Integer, List<String>> commentsMap = getCommentsMap();
-        for (Integer postDaoId : commentsMap.keySet()) {
-            if (postDaosMap.containsKey(postDaoId)) {
-                postDaosMap.get(postDaoId).getCommentsList().addAll(commentsMap.get(postDaoId));
-            }
-        }
+        return getPostDaoListWithCommentsAndTags(postDaosList);
     }
 
     @Override
-    public List<PostDao> getFeedWithChosenTags(String tagsString) {
-        String[] tagsArray = tagsString.split(",");
-        String tagsInString = mapListTextsToString(List.of(tagsArray));
+    public List<PostDao> getFeedWithChosenTags(String tagsInString) {
         List<Integer> postDaosIdsWithTags = jdbcTemplate.query(
                 """
                         SELECT post_id
@@ -128,28 +88,50 @@ public class JdbcBlogRepository implements PostRepository {
                         WHERE id IN 
                         """ + postDaosIdsInString, MAP_TO_POSTDAO
         );
-        Map<Integer, PostDao> selectedPostDaosMap = selectedPostDaosList.stream()
-                .collect(Collectors.toMap(PostDao::getId, postDao -> postDao));
-        addCommentsToPostDaos(selectedPostDaosMap);
-        addTagsToPostDaos(selectedPostDaosMap);
-
-        return new ArrayList<>(selectedPostDaosMap.values());
-    }
-
-    @Override
-    public void deletePost(Long id) {
-        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        return getPostDaoListWithCommentsAndTags(selectedPostDaosList);
     }
 
     @Override
     public PostDao getPostById(Long id) {
         String query = "SELECT * FROM posts WHERE id = " + id + ";";
         PostDao postDao = jdbcTemplate.query(query, MAP_TO_POSTDAO).get(0);
-        List<String> commentList = getAllCommentsForPost(postDao.getId());
+        List<Comment> commentList = getAllCommentsForPost(postDao.getId());
         postDao.getCommentsList().addAll(commentList);
         List<String> tagsTextList = getAllTagsTextForPost(postDao.getId());
         postDao.getTagsTextList().addAll(tagsTextList);
         return postDao;
+    }
+
+    @Override
+    public List<PostDao> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
+        List<PostDao> postDaosList = jdbcTemplate.query(
+                "SELECT * FROM posts p LIMIT " + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1),
+                MAP_TO_POSTDAO);
+        return getPostDaoListWithCommentsAndTags(postDaosList);
+    }
+
+    @Override
+    public void changePost(PostDao changedPostDao) {
+        jdbcTemplate.update("""
+                DELETE FROM posts_tags
+                WHERE post_id = ?
+                """, changedPostDao.getId());
+
+        jdbcTemplate.update(
+                """
+                        UPDATE posts 
+                        SET name = ?, base_64_image = ?, text = ?
+                        WHERE id = ?
+                        """,
+                changedPostDao.getName(), changedPostDao.getBase64Image(), changedPostDao.getText(), changedPostDao.getId());
+
+        addNewTags(changedPostDao);
+        System.out.println();
+    }
+
+    @Override
+    public void deletePost(Long id) {
+        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
     }
 
     private List<String> getAllTagsTextForPost(int postId) {
@@ -170,24 +152,12 @@ public class JdbcBlogRepository implements PostRepository {
         return tagsTextList;
     }
 
-    private String mapListIdsToString(List<Integer> idsList) {
-        StringBuilder sb = new StringBuilder("('");
-        for (Integer id: idsList) {
-            sb.append(id).append("','");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        sb.append(")");
-        return sb.toString();
-    }
-
-    private String mapListTextsToString(List<String> tagsTextList) {
-        StringBuilder sb = new StringBuilder("('");
-        for (String tagText: tagsTextList) {
-            sb.append(tagText.trim()).append("','");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        sb.append(")");
-        return sb.toString();
+    @Override
+    public void deleteComment(Long postDaoId, Long commentId) {
+        jdbcTemplate.update("""
+                DELETE FROM comments
+                WHERE id = ?
+                """, commentId);
     }
 
     private Map<Integer, String> getTagsMap() {
@@ -247,31 +217,70 @@ public class JdbcBlogRepository implements PostRepository {
         }
     }
 
-    private Map<Integer, List<String>> getCommentsMap() {
-        Map<Integer, List<String>> comments = new HashMap<>();
+    private Map<Integer, List<Comment>> getCommentsMap() {
+        Map<Integer, List<Comment>> comments = new HashMap<>();
         List<Comment> commentList = jdbcTemplate.query(
                 """
-                        SELECT post_id, text
+                        SELECT *
                         FROM comments
                         """, MAP_TO_COMMENTS);
         for (Comment c : commentList) {
             if (!comments.containsKey(c.getPostId())) {
                 comments.put(c.getPostId(), new ArrayList<>());
             }
-            comments.get(c.getPostId()).add(c.getComment());
+            comments.get(c.getPostId()).add(c);
         }
 
         return comments;
     }
 
-    private List<String> getAllCommentsForPost(int postId) {
-        List<String> commentList = jdbcTemplate.query(
+    private List<Comment> getAllCommentsForPost(int postId) {
+        List<Comment> commentList = jdbcTemplate.query(
                 """
-                        SELECT text
+                        SELECT *
                         FROM comments
                         WHERE post_id = 
-                        """ + postId, MAP_TO_TEXT);
+                        """ + postId, MAP_TO_COMMENTS);
 
         return commentList;
+    }
+
+    private void addTagsToPostDaos(Map<Integer, PostDao> postDaosMap) {
+        Map<Integer, String> tagsMap = getTagsMap();
+        List<PostTag> postsTagsList = getPostsTagsList();
+        for (PostTag pt : postsTagsList) {
+            if (postDaosMap.containsKey(pt.getPostId())) {
+                postDaosMap.get(pt.getPostId()).getTagsTextList().add(tagsMap.get(pt.getTagId()));
+            }
+        }
+    }
+
+    private void addCommentsToPostDaos(Map<Integer, PostDao> postDaosMap) {
+        Map<Integer, List<Comment>> commentsMap = getCommentsMap();
+        for (Integer postDaoId : commentsMap.keySet()) {
+            if (postDaosMap.containsKey(postDaoId)) {
+                postDaosMap.get(postDaoId).getCommentsList().addAll(commentsMap.get(postDaoId));
+            }
+        }
+    }
+
+    private String mapListIdsToString(List<Integer> idsList) {
+        StringBuilder sb = new StringBuilder("('");
+        for (Integer id : idsList) {
+            sb.append(id).append("','");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append(")");
+        return sb.toString();
+    }
+
+
+    private List<PostDao> getPostDaoListWithCommentsAndTags(List<PostDao> postDaosList) {
+        Map<Integer, PostDao> postDaosMap = postDaosList.stream()
+                .collect(Collectors.toMap(PostDao::getId, postDao -> postDao));
+
+        addCommentsToPostDaos(postDaosMap);
+        addTagsToPostDaos(postDaosMap);
+        return new ArrayList<>(postDaosMap.values());
     }
 }
