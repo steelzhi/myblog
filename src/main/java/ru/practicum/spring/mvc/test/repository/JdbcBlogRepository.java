@@ -1,0 +1,286 @@
+package ru.practicum.spring.mvc.test.repository;
+
+import ru.practicum.spring.mvc.test.model.Comment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import ru.practicum.spring.mvc.test.dto.PostDto;
+import ru.practicum.spring.mvc.test.model.PostTag;
+import ru.practicum.spring.mvc.test.model.Tag;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Repository
+public class JdbcBlogRepository implements PostRepository {
+    @Autowired
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcBlogRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public PostDto addPostDto(PostDto postDto) {
+        jdbcTemplate.update("INSERT INTO posts (name, base_64_image, text) VALUES (?, ?, ?)",
+                postDto.getName(), postDto.getBase64Image(), postDto.getText());
+
+        int postDtoId = jdbcTemplate.query("""
+                SELECT id
+                FROM posts
+                ORDER BY id DESC
+                LIMIT(1);
+                """, MAP_TO_ID).get(0);
+
+        postDto.setId(postDtoId);
+        addNewTags(postDto);
+        return postDto;
+    }
+
+    @Override
+    public PostDto addLike(int postDtoId) {
+        jdbcTemplate.update(
+                """
+                        UPDATE posts 
+                        SET number_of_likes = number_of_likes + 1
+                        WHERE id = ?
+                        """,
+                postDtoId
+        );
+
+        return getPostById(postDtoId);
+    }
+
+    @Override
+    public PostDto addComment(int postDtoId, String commentText) {
+        jdbcTemplate.update("INSERT INTO comments (post_id, text) VALUES (?, ?)", postDtoId, commentText);
+
+        return getPostById(postDtoId);
+    }
+
+    @Override
+    public List<PostDto> getSortedFeed() {
+        List<PostDto> postDtosList = jdbcTemplate.query(
+                """
+                        SELECT * 
+                        FROM posts p
+                        ORDER BY id DESC
+                        """, MAP_TO_POSTDTO);
+        return getPostDtoListWithCommentsAndTags(postDtosList);
+    }
+
+    @Override
+    public List<PostDto> getFeedWithChosenTags(String tagsInString) {
+        List<Integer> postDtosIdsWithTags = jdbcTemplate.query(
+                "SELECT post_id FROM posts_tags pt LEFT JOIN tags t ON t.id = pt.tag_id WHERE t.text IN " + tagsInString + " ORDER BY id DESC", MAP_TO_POST_ID
+        );
+
+        if (postDtosIdsWithTags.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String postDtosIdsInString = mapListIdsToString(postDtosIdsWithTags);
+        List<PostDto> selectedPostDtosList = jdbcTemplate.query(
+                """
+                        SELECT *
+                        FROM posts
+                        WHERE id IN 
+                        """ + postDtosIdsInString, MAP_TO_POSTDTO
+        );
+        return getPostDtoListWithCommentsAndTags(selectedPostDtosList);
+    }
+
+    @Override
+    public PostDto getPostById(int id) {
+        String query = "SELECT * FROM posts WHERE id = " + id + ";";
+        PostDto postDto = jdbcTemplate.query(query, MAP_TO_POSTDTO).get(0);
+        List<Comment> commentList = getAllCommentsForPost(postDto.getId());
+        postDto.getCommentsList().addAll(commentList);
+        List<String> tagsTextList = getAllTagsTextForPost(postDto.getId());
+        postDto.getTagsTextList().addAll(tagsTextList);
+        return postDto;
+    }
+
+    @Override
+    public List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
+        List<PostDto> postDtosList = jdbcTemplate.query(
+                "SELECT * FROM posts p LIMIT " + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1) + " ORDER BY id DESC",
+                MAP_TO_POSTDTO);
+        return getPostDtoListWithCommentsAndTags(postDtosList);
+    }
+
+    @Override
+    public PostDto changePost(PostDto changedPostDto) {
+        jdbcTemplate.update("""
+                DELETE FROM posts_tags
+                WHERE post_id = ?
+                """, changedPostDto.getId());
+
+        jdbcTemplate.update(
+                """
+                        UPDATE posts 
+                        SET name = ?, base_64_image = ?, text = ?
+                        WHERE id = ?
+                        """,
+                changedPostDto.getName(), changedPostDto.getBase64Image(), changedPostDto.getText(), changedPostDto.getId());
+
+        addNewTags(changedPostDto);
+        return getPostById(changedPostDto.getId());
+    }
+
+    @Override
+    public void deletePost(int id) {
+        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+    }
+
+    private List<String> getAllTagsTextForPost(int postId) {
+        List<String> tagsTextList = new ArrayList<>();
+        List<PostTag> postsTagsList = getPostsTagsList();
+        if (postsTagsList != null && !postsTagsList.isEmpty()) {
+            List<Integer> tagsIdsForPostDto = getTagsIdsForPostDto(postId);
+            if (tagsIdsForPostDto != null && !tagsIdsForPostDto.isEmpty()) {
+                String tagsIdsInStringWithBrackets = mapListIdsToString(tagsIdsForPostDto);
+                tagsTextList = jdbcTemplate.query("""
+                        SELECT text
+                        FROM tags
+                        WHERE id IN 
+                        """ + tagsIdsInStringWithBrackets, MAP_TO_TEXT);
+            }
+        }
+
+        return tagsTextList;
+    }
+
+    @Override
+    public PostDto deleteComment(int postDtoId, int commentId) {
+        jdbcTemplate.update("""
+                DELETE FROM comments
+                WHERE id = ?
+                """, commentId);
+        return getPostById(postDtoId);
+    }
+
+    private Map<Integer, String> getTagsMap() {
+        List<Tag> tagList = jdbcTemplate.query(
+                """
+                        SELECT *
+                        FROM tags
+                        """, MAP_TO_TAG);
+        Map<Integer, String> tagMap = tagList.stream()
+                .collect(Collectors.toMap(Tag::getId, Tag::getText));
+
+        return tagMap;
+    }
+
+    private List<PostTag> getPostsTagsList() {
+        return jdbcTemplate.query("""
+                SELECT *
+                FROM posts_tags
+                """, MAP_TO_POST_TAG);
+    }
+
+    private List<Integer> getTagsIdsForPostDto(int postDtoId) {
+        return jdbcTemplate.query("""
+                SELECT tag_id
+                FROM posts_tags
+                WHERE post_id = 
+                """ + postDtoId, MAP_TO_TAG_ID);
+    }
+
+    private void addNewTags(PostDto postDto) {
+        Map<Integer, String> tagMap = getTagsMap();
+        for (String tagText : postDto.getTagsTextList()) {
+            int tagId;
+            if (!tagMap.containsValue(tagText)) {
+                jdbcTemplate.update("""
+                                INSERT INTO tags (text)
+                                VALUES (?);
+                                """,
+                        tagText);
+
+                tagId = jdbcTemplate.query("""
+                        SELECT id
+                        FROM tags
+                        ORDER BY id DESC
+                        LIMIT(1);
+                        """, MAP_TO_ID).get(0);
+            } else {
+                tagId = jdbcTemplate.query(" SELECT id FROM tags WHERE text = " + tagText,
+                        MAP_TO_ID).get(0);
+            }
+
+            jdbcTemplate.update("""
+                            INSERT INTO posts_tags (post_id, tag_id)
+                            VALUES (?, ?);
+                            """,
+                    postDto.getId(), tagId);
+        }
+    }
+
+    private Map<Integer, List<Comment>> getCommentsMap() {
+        Map<Integer, List<Comment>> comments = new HashMap<>();
+        List<Comment> commentList = jdbcTemplate.query(
+                """
+                        SELECT *
+                        FROM comments
+                        """, MAP_TO_COMMENTS);
+        for (Comment c : commentList) {
+            if (!comments.containsKey(c.getPostId())) {
+                comments.put(c.getPostId(), new ArrayList<>());
+            }
+            comments.get(c.getPostId()).add(c);
+        }
+
+        return comments;
+    }
+
+    private List<Comment> getAllCommentsForPost(long postId) {
+        List<Comment> commentList = jdbcTemplate.query(
+                """
+                        SELECT *
+                        FROM comments
+                        WHERE post_id = 
+                        """ + postId, MAP_TO_COMMENTS);
+
+        return commentList;
+    }
+
+    private void addTagsToPostDtos(Map<Integer, PostDto> postDtosMap) {
+        Map<Integer, String> tagsMap = getTagsMap();
+        List<PostTag> postsTagsList = getPostsTagsList();
+        for (PostTag pt : postsTagsList) {
+            if (postDtosMap.containsKey(pt.getPostId())) {
+                postDtosMap.get(pt.getPostId()).getTagsTextList().add(tagsMap.get(pt.getTagId()));
+            }
+        }
+    }
+
+    private void addCommentsToPostDtos(Map<Integer, PostDto> postDtosMap) {
+        Map<Integer, List<Comment>> commentsMap = getCommentsMap();
+        for (Integer postDtoId : commentsMap.keySet()) {
+            if (postDtosMap.containsKey(postDtoId)) {
+                postDtosMap.get(postDtoId).getCommentsList().addAll(commentsMap.get(postDtoId));
+            }
+        }
+    }
+
+    private String mapListIdsToString(List<Integer> idsList) {
+        StringBuilder sb = new StringBuilder("('");
+        for (Integer id : idsList) {
+            sb.append(id).append("','");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append(")");
+        return sb.toString();
+    }
+
+
+    private List<PostDto> getPostDtoListWithCommentsAndTags(List<PostDto> postDtosList) {
+        Map<Integer, PostDto> postDtosMap = postDtosList.stream()
+                .collect(Collectors.toMap(PostDto::getId, postDto -> postDto));
+
+        addCommentsToPostDtos(postDtosMap);
+        addTagsToPostDtos(postDtosMap);
+        return new ArrayList<>(postDtosMap.values());
+    }
+}
