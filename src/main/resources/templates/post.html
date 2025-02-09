@@ -55,34 +55,34 @@
     </style>
 </head>
 <body>
-<h1 th:text="'Пост с id = ' + ${postDao.id}"></h1>
+<h1 th:text="'Пост с id = ' + ${postDto.id}"></h1>
 <table>
     <tbody>
     <tr>
         <th>Название</th>
-        <td th:text="${postDao.name}"/>
+        <td th:text="${postDto.name}"/>
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>
+        <td><img th:src="@{'data:image/jpeg;base64,'+${postDto.base64Image}}" width="400"/></td>
     </tr>
     <tr>
         <th>Текст</th>
-        <td th:text="${postDao.text}"/>
+        <td th:text="${postDto.text}"/>
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDao.tagsTextList}"/>
+        <td th:text="${postDto.tagsTextList}"/>
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDao.commentsList)}"/>
+        <td th:text="${#lists.size(postDto.commentsList)}"/>
     </tr>
-    <tr th:each="comment : ${postDao.commentsList}">
+    <tr th:each="comment : ${postDto.commentsList}">
         <th>Комментарий</th>
         <td contenteditable="true" th:text="${comment.text}"/>
         <td>
-            <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDao.id}, commentId=${comment.id})}"
+            <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDto.id}, commentId=${comment.id})}"
                   method="post" style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <button type="submit">Удалить комментарий</button>
@@ -91,12 +91,12 @@
     </tr>
     <tr>
         <th>Количество лайков</th>
-        <td th:text="${postDao.numberOfLikes}"/>
+        <td th:text="${postDto.numberOfLikes}"/>
     </tr>
     </tbody>
 </table>
 
-<form th:action="@{/feed/post/{id}/addLike(id=${postDao.id})}" method="POST">
+<form th:action="@{/feed/post/{id}/addLike(id=${postDto.id})}" method="POST">
     <input type="hidden">
     <button type="submit">Поставить лайк</button>
 </form>
@@ -105,7 +105,7 @@
 <button class="btn-add" onclick="toggleForm2()">Добавить комментарий</button>
 <div class="form-container" style="display: none;" id="addComment">
     <h2>Добавить комментарий</h2>
-    <form th:action="@{/feed/post/addComment/{id}(id=${postDao.id})}" method="POST"
+    <form th:action="@{/feed/post/addComment/{id}(id=${postDto.id})}" method="POST"
           th:object="${comment}">
         <input type="hidden">
         <label for="text">Текст:</label>
@@ -118,13 +118,13 @@
 <button class="btn-add" onclick="toggleForm()">Редактировать пост</button>
 <div class="form-container" style="display: none;" id="changeForm">
     <h2>Редактировать пост</h2>
-    <form th:action="@{/feed/post/{id}/change(id=${postDao.id})}" method="POST" th:object="${post}"
+    <form th:action="@{/feed/post/{id}/change(id=${postDto.id})}" method="POST" th:object="${post}"
           enctype="multipart/form-data">
         <label for="name">Название:</label>
         <input type="text" id="name" name="name" required>
         <label for="file">Прикрепите картинку:</label>
         <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
-        <button type="submit">Загрузить</button>
+        <!--        <button type="submit">Загрузить</button>-->
         <label for="text">Текст:</label>
         <input type="text" id="text" name="text" required>
         <label for="tagsString">Теги:</label>
@@ -134,7 +134,7 @@
 </div>
 <br>
 
-<form th:action="@{/feed/post/{id}(id=${postDao.id})}" method="post" style="display:inline;">
+<form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
     <input type="hidden" name="_method" value="delete">
     <button type="submit">Удалить пост</button>
 </form>
@@ -154,6 +154,16 @@
     function toggleForm2() {
         const form = document.getElementById('addComment');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<script>
+    function toggleForm3() {
+        document.body.addEventListener('keydown', (event) => {
+            if(event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                event.target.form?.submit();
+            }
+        });
     }
 </script>
 

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dao;
+package ru.yandex.practicum.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PostDao {
+public class PostDto {
     private int id;
     private String name;
     private String base64Image;
@@ -22,7 +22,7 @@ public class PostDao {
     private List<Comment> commentsList = new ArrayList<>();
     private static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
 
-    public PostDao(int id, String name, String base64Image, String text, int numberOfLikes, String tagsString) {
+    public PostDto(int id, String name, String base64Image, String text, int numberOfLikes, String tagsString) {
         this.id = id;
         this.name = name;
         this.base64Image = base64Image;

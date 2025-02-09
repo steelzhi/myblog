@@ -52,6 +52,9 @@
         .btn-add {
             margin-bottom: 20px;
         }
+        p {
+            display: inline;
+        }
     </style>
 </head>
 <body>
@@ -87,37 +90,37 @@
     </form>
 </div>
 
-<table th:each="postDao : ${feed}">
+<table th:each="postDto : ${feed}">
     <tbody>
     <tr>
         <th>Название</th>
         <td>
-            <a th:href="@{/feed/post/{id}(id=${postDao.id})}" th:text="${postDao.name}"></a>
+            <a th:href="@{/feed/post/{id}(id=${postDto.id})}" th:text="${postDto.name}"></a>
         </td>
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{'data:image/jpeg;base64,'+${postDao.base64Image}}" width="400"/></td>
+        <td><img th:src="@{'data:image/jpeg;base64,'+${postDto.base64Image}}" width="400"/></td>
     </tr>
     <tr>
         <th>Превью</th>
-        <td th:text="${postDao.preview}"/>
+        <td th:text="${postDto.preview}"/>
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDao.commentsList)}"/>
+        <td th:text="${#lists.size(postDto.commentsList)}"/>
     </tr>
     <tr>
         <th>Количество лайков</th>
-        <td th:text="${postDao.numberOfLikes}"/>
+        <td th:text="${postDto.numberOfLikes}"/>
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDao.tagsTextList}"/>
+        <td th:text="${postDto.tagsTextList}"/>
     </tr>
     <tr>
         <td>
-            <form th:action="@{/feed/{id}(id=${postDao.id})}" method="post" style="display:inline;">
+            <form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <button type="submit">Удалить</button>
             </form>
@@ -126,40 +129,47 @@
     </tbody>
 </table>
 
-<form th:action="@{/feed/pages}">
-    <input type="hidden" name="postsOnPage" value="2">
-    <input type="hidden" name="pageNumber" value="1">
+<form th:action="@{/feed/pages/2/1}">
+    <!--    <input type="hidden" name="postsOnPage" value="2">
+        <input type="hidden" name="pageNumber" value="1">-->
     <button type="submit">Показывать по 2 поста</button>
 </form>
 
-<form th:action="@{/feed/pages}">
-    <input type="hidden" name="postsOnPage" value="3">
-    <input type="hidden" name="pageNumber" value="1">
+<form th:action="@{/feed/pages/3/1}">
+    <!--    <input type="hidden" name="postsOnPage" value="3">
+        <input type="hidden" name="pageNumber" value="1">-->
     <button type="submit">Показывать по 3 поста</button>
 </form>
 
-<form th:action="@{/feed/pages}">
-    <input type="hidden" name="postsOnPage" value="5">
-    <input type="hidden" name="pageNumber" value="1">
+<form th:action="@{/feed/pages/5/1}">
+    <!--    <input type="hidden" name="postsOnPage" value="5">
+        <input type="hidden" name="pageNumber" value="1">-->
     <button type="submit">Показывать по 5 постов</button>
 </form>
 
-<br>
-<span>Страницы</span>
-<br>
 
-<table th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
+<div th:if="${pages != null}">
+    <br>
+    <span>Страницы:</span>
+    <br>
+
+    <p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
+        <a th:href="@{/feed/pages/{postsOnPage}/{i}(postsOnPage=${pages.postsOnPage}, i=${i})}" th:text="${i} "></a>
+    </p>
+</div>
+
+<!--<table th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
     <tbody>
     <tr>
         <th>Страница</th>
         <td>
-            <!--            <input type="hidden" name="postsOnPage" th:value="${pages.postsOnPage}">
-                        <input type="hidden" name="pageNumber" th:value="${i}">-->
+&lt;!&ndash;            <input type="hidden" name="postsOnPage" th:value="${pages.postsOnPage}">
+            <input type="hidden" name="pageNumber" th:value="${i}">&ndash;&gt;
             <a th:href="@{/feed/pages}" th:text="${i}"></a>
         </td>
     </tr>
     </tbody>
-</table>
+</table>-->
 
 <!--<p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
 <p th:text="${i}"></p>
@@ -171,7 +181,7 @@
 <!--<tr th:each="page : ${pages}">
     <td>
         <th th:text=${page}></th>
-<a th:href="@{/feed/post/{id}(id=${postDao.id})}" th:text="${postDao.name}"></a>
+<a th:href="@{/feed/post/{id}(id=${postDto.id})}" th:text="${postDto.name}"></a>
 
     </td>
 </tr>-->

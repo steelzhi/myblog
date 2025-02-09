@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import ru.yandex.practicum.dao.PostDao;
+import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Pages;
 import ru.yandex.practicum.model.Post;
@@ -41,17 +41,15 @@ public class PostController {
 
     @GetMapping
     public String getFeed(Model model) {
-        List<PostDao> feed = postService.getSortedFeed();
+        List<PostDto> feed = postService.getSortedFeed();
         model.addAttribute("feed", feed);
-        Pages pages = new Pages(feed.size(), 1);
-        model.addAttribute("pages", pages);
 
         return "feed";
     }
 
     @GetMapping("/tags/")
     public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) {
-        List<PostDao> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
+        List<PostDto> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
         model.addAttribute("feed", feedWithChosenTags);
 
         return "feed";
@@ -59,19 +57,19 @@ public class PostController {
 
     @GetMapping("/post/{id}")
     public String getPostById(@PathVariable(name = "id") Long id, Model model) {
-        PostDao postDao = postService.getPostById(id);
-        model.addAttribute("postDao", postDao);
+        PostDto postDto = postService.getPostById(id);
+        model.addAttribute("postDto", postDto);
 
         return "post";
     }
 
-    @GetMapping("/pages")
-    public String getFeedSplittedByPages(@RequestParam(name = "postsOnPage") int postsOnPage,
-                                         @RequestParam(name = "pageNumber") int pageNumber,
+    @GetMapping("/pages/{postsOnPage}/{pageNumber}")
+    public String getFeedSplittedByPages(@PathVariable(name = "postsOnPage") int postsOnPage,
+                                         @PathVariable(name = "pageNumber") int pageNumber,
                                          Model model) {
-        List<PostDao> feedSplittedByPages = postService.getFeedSplittedByPages(postsOnPage, pageNumber);
+        List<PostDto> feedSplittedByPages = postService.getFeedSplittedByPages(postsOnPage, pageNumber);
         int feedFullSize = postService.getSortedFeed().size();
-        Pages pages = new Pages(postsOnPage, feedFullSize / postsOnPage + 1);
+        Pages pages = new Pages(postsOnPage, (feedFullSize - 1) / postsOnPage + 1);
         model.addAttribute("feed", feedSplittedByPages);
         model.addAttribute("pages", pages);
 
@@ -89,7 +87,7 @@ public class PostController {
     @PostMapping(value = "/post/{id}", params = "_method=delete")
     public String deletePost(@PathVariable(name = "id") Long id) {
         postService.deletePost(id);
-        List<PostDao> feed = postService.getSortedFeed();
+        List<PostDto> feed = postService.getSortedFeed();
 
         return "redirect:/feed";
     }

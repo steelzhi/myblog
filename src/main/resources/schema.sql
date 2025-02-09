@@ -29,17 +29,4 @@ CREATE TABLE posts_tags (
     CONSTRAINT posts_tags_tag FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-INSERT INTO posts (name, text) VALUES ('1-й пост', 'Это 1-й пост');
-INSERT INTO posts (name, text) VALUES ('2-й пост', 'Это 2-й пост');
-INSERT INTO posts (name, text) VALUES ('3-й пост', 'Это 3-й пост');
-INSERT INTO comments (text, post_id) VALUES ('Это самый 1-й пост!', 1);
-INSERT INTO comments (text, post_id) VALUES ('Это самый 1-й пост!. И - 2-й комментарий к нему', 1);
-INSERT INTO comments (text, post_id) VALUES ('Это 3-й пост!.', 3);
-INSERT INTO tags (id, text) VALUES (1, '#Общий тег');
-INSERT INTO tags (id, text) VALUES (2, '#Тег для поста 2');
-INSERT INTO tags (id, text) VALUES (3, '#Тег для поста 3');
-INSERT INTO posts_tags (post_id, tag_id) VALUES (1, 1);
-INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 1);
-INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 2);
-INSERT INTO posts_tags (post_id, tag_id) VALUES (3, 1);
-INSERT INTO posts_tags (post_id, tag_id) VALUES (3, 3);
+

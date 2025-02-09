@@ -2,7 +2,7 @@ package ru.yandex.practicum.repository;
 
 import ru.yandex.practicum.model.Comment;
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.dao.PostDao;
+import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.model.PostTag;
 import ru.yandex.practicum.model.Tag;
 
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.util.List;
 
 public interface PostRepository {
-    RowMapper<PostDao> MAP_TO_POSTDAO = (ResultSet resultSet, int rowNum) -> new PostDao(
+    RowMapper<PostDto> MAP_TO_POSTDto = (ResultSet resultSet, int rowNum) -> new PostDto(
             resultSet.getInt("id"),
             resultSet.getString("name"),
             resultSet.getString("base_64_image"),
@@ -44,14 +44,14 @@ public interface PostRepository {
             resultSet.getInt("post_id"),
             resultSet.getInt("tag_id"));
 
-    void addPostDao(PostDao postDao);
-    void addLike(int postDaoId);
+    void addPostDto(PostDto postDto);
+    void addLike(int postDtoId);
     void addComment(int postId, String commentText);
-    List<PostDao> getSortedFeed();
-    List<PostDao> getFeedWithChosenTags(String tagsString);
-    PostDao getPostById(Long id);
-    List<PostDao> getFeedSplittedByPages(int postsOnPage, int pageNumber);
-    void changePost(PostDao newPostDao);
+    List<PostDto> getSortedFeed();
+    List<PostDto> getFeedWithChosenTags(String tagsString);
+    PostDto getPostById(Long id);
+    List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber);
+    void changePost(PostDto newPostDto);
     void deletePost(Long id);
-    void deleteComment(Long postDaoId, Long commentId);
+    void deleteComment(Long postDtoId, Long commentId);
 }
