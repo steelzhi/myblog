@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.util.List;
 
 public interface PostRepository {
-    RowMapper<PostDto> MAP_TO_POSTDto = (ResultSet resultSet, int rowNum) -> new PostDto(
+    RowMapper<PostDto> MAP_TO_POSTDTO = (ResultSet resultSet, int rowNum) -> new PostDto(
             resultSet.getInt("id"),
             resultSet.getString("name"),
             resultSet.getString("base_64_image"),
@@ -44,14 +44,14 @@ public interface PostRepository {
             resultSet.getInt("post_id"),
             resultSet.getInt("tag_id"));
 
-    void addPostDto(PostDto postDto);
-    void addLike(int postDtoId);
-    void addComment(int postId, String commentText);
+    PostDto addPostDto(PostDto postDto);
+    PostDto addLike(int postDtoId);
+    PostDto addComment(int postId, String commentText);
     List<PostDto> getSortedFeed();
     List<PostDto> getFeedWithChosenTags(String tagsString);
-    PostDto getPostById(Long id);
+    PostDto getPostById(int id);
     List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber);
-    void changePost(PostDto newPostDto);
-    void deletePost(Long id);
-    void deleteComment(Long postDtoId, Long commentId);
+    PostDto changePost(PostDto newPostDto);
+    void deletePost(int id);
+    PostDto deleteComment(int postDtoId, int commentId);
 }

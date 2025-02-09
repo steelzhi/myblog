@@ -11,8 +11,11 @@ public class PostMapper {
     }
 
     public static PostDto mapToPostDto(Post post) throws IOException {
-        byte[] bytes = post.getFile().getBytes();
-        String imageBase64 = Base64.getEncoder().encodeToString(bytes);
+        String imageBase64 = null;
+        if (post.getFile() != null) {
+            byte[] bytes = post.getFile().getBytes();
+            imageBase64 = Base64.getEncoder().encodeToString(bytes);
+        }
 
         return new PostDto(
                 post.getId(),

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.PostDto;
@@ -12,21 +13,22 @@ import java.io.*;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class PostService {
 
     @Autowired
     private PostRepository postRepository;
 
-    public void addPost(Post post) throws IOException {
-        postRepository.addPostDto(PostMapper.mapToPostDto(post));
+    public PostDto addPost(Post post) throws IOException {
+        return postRepository.addPostDto(PostMapper.mapToPostDto(post));
     }
 
-    public void addLike(Integer id) {
-        postRepository.addLike(id);
+    public PostDto addLike(int id) {
+        return postRepository.addLike(id);
     }
 
-    public void addComment(int postId, Comment comment) {
-        postRepository.addComment(postId, comment.getText());
+    public PostDto addComment(int postId, Comment comment) {
+        return postRepository.addComment(postId, comment.getText());
     }
 
     public List<PostDto> getSortedFeed() {
@@ -39,7 +41,7 @@ public class PostService {
         return postRepository.getFeedWithChosenTags(tagsInString);
     }
 
-    public PostDto getPostById(Long id) {
+    public PostDto getPostById(int id) {
         return postRepository.getPostById(id);
     }
 
@@ -47,16 +49,16 @@ public class PostService {
         return postRepository.getFeedSplittedByPages(postsOnPage, pageNumber);
     }
 
-    public void changePost(Post changedPost) throws IOException {
-        postRepository.changePost(PostMapper.mapToPostDto(changedPost));
+    public PostDto changePost(Post changedPost) throws IOException {
+        return postRepository.changePost(PostMapper.mapToPostDto(changedPost));
     }
 
-    public void deletePost(Long id) {
+    public void deletePost(int id) {
         postRepository.deletePost(id);
     }
 
-    public void deleteComment(Long postDtoId, Long commentId) {
-        postRepository.deleteComment(postDtoId, commentId);
+    public PostDto deleteComment(int postDtoId, int commentId) {
+        return postRepository.deleteComment(postDtoId, commentId);
     }
 
     private String mapListTextsToString(List<String> tagsTextList) {

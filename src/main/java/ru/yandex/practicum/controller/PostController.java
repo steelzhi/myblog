@@ -26,7 +26,7 @@ public class PostController {
     }
 
     @PostMapping("/post/{id}/addLike")
-    public String addLike(@PathVariable(name = "id") Integer id) throws IOException {
+    public String addLike(@PathVariable(name = "id") int id) throws IOException {
         postService.addLike(id);
 
         return "redirect:/feed/post/" + id;
@@ -56,7 +56,7 @@ public class PostController {
     }
 
     @GetMapping("/post/{id}")
-    public String getPostById(@PathVariable(name = "id") Long id, Model model) {
+    public String getPostById(@PathVariable(name = "id") int id, Model model) {
         PostDto postDto = postService.getPostById(id);
         model.addAttribute("postDto", postDto);
 
@@ -77,7 +77,7 @@ public class PostController {
     }
 
     @PostMapping("/post/{id}/change")
-    public String changePost(@ModelAttribute Post post, @PathVariable(name = "id") Integer id) throws IOException {
+    public String changePost(@ModelAttribute Post post, @PathVariable(name = "id") int id) throws IOException {
         post.setId(id);
         postService.changePost(post);
 
@@ -85,7 +85,7 @@ public class PostController {
     }
 
     @PostMapping(value = "/post/{id}", params = "_method=delete")
-    public String deletePost(@PathVariable(name = "id") Long id) {
+    public String deletePost(@PathVariable(name = "id") int id) {
         postService.deletePost(id);
         List<PostDto> feed = postService.getSortedFeed();
 
@@ -93,8 +93,8 @@ public class PostController {
     }
 
     @PostMapping(value = "/post/{id}/removeComment/{commentId}", params = "_method=delete")
-    public String deleteComment(@PathVariable(name = "id") Long id,
-                                @PathVariable(name = "commentId") Long commentId) {
+    public String deleteComment(@PathVariable(name = "id") int id,
+                                @PathVariable(name = "commentId") int commentId) {
         postService.deleteComment(id, commentId);
 
         return "redirect:/feed/post/" + id;
