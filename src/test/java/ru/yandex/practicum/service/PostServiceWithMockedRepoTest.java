@@ -211,13 +211,4 @@ public class PostServiceWithMockedRepoTest {
             return mock(PostRepository.class);
         }
     }
-
-    private String mapListTextsToString(List<String> tagsTextList) {
-        StringBuilder sb = new StringBuilder();
-        for (String tagText : tagsTextList) {
-            sb.append(tagText.trim()).append(",");
-        }
-        sb.delete(sb.length() - 1, sb.length());
-        return sb.toString();
-    }
 }

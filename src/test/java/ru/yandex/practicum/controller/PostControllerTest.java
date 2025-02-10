@@ -1,9 +1,9 @@
 package ru.yandex.practicum.controller;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -12,13 +12,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.yandex.practicum.configuration.DataSourceConfiguration;
 import ru.yandex.practicum.configuration.WebConfiguration;
-import ru.yandex.practicum.dto.PostDto;
-import ru.yandex.practicum.model.Tag;
 
-import java.sql.ResultSet;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfiguration.class, WebConfiguration.class})
@@ -90,7 +86,6 @@ public class PostControllerTest {
                 .andExpect(model().attributeExists("feed"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(3 * 7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
-
     }
 
     @Test
@@ -103,7 +98,6 @@ public class PostControllerTest {
                 .andExpect(model().attributeExists("feed"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
-
     }
 
     @Test
@@ -115,7 +109,6 @@ public class PostControllerTest {
                 .andExpect(model().attributeExists("postDto"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(6))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
-
     }
 
     @Test
@@ -127,7 +120,6 @@ public class PostControllerTest {
                 .andExpect(model().attributeExists("feed"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
-
     }
 
     @Test
@@ -145,7 +137,6 @@ public class PostControllerTest {
                         .param("_method", "delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed"));
-
     }
 
     @Test
@@ -154,6 +145,5 @@ public class PostControllerTest {
                         .param("_method", "delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/2"));
-
     }
 }

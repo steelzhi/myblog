@@ -66,7 +66,6 @@ public class JdbcBlogRepository implements PostRepository {
                 """
                         SELECT * 
                         FROM posts p
-                        ORDER BY id DESC
                         """, MAP_TO_POSTDTO);
         return getPostDtoListWithCommentsAndTags(postDtosList);
     }
@@ -208,7 +207,7 @@ public class JdbcBlogRepository implements PostRepository {
                         LIMIT(1);
                         """, MAP_TO_ID).get(0);
             } else {
-                tagId = jdbcTemplate.query(" SELECT id FROM tags WHERE text = " + tagText,
+                tagId = jdbcTemplate.query("SELECT id FROM tags WHERE text = '" + tagText + "'",
                         MAP_TO_ID).get(0);
             }
 
@@ -284,6 +283,12 @@ public class JdbcBlogRepository implements PostRepository {
 
         addCommentsToPostDtos(postDtosMap);
         addTagsToPostDtos(postDtosMap);
-        return new ArrayList<>(postDtosMap.values());
+        List<PostDto> postDtoList = new ArrayList<>(postDtosMap.values());
+        postDtoList.sort(getComparatorForId());
+        return postDtoList;
+    }
+
+    private Comparator<PostDto> getComparatorForId() {
+        return (p1, p2) -> p2.getId() - p1.getId();
     }
 }
