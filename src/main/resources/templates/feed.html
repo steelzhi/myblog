@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!-- Название страницы-->
     <title>Лента</title>
@@ -60,21 +60,21 @@
 <body>
 <h1>Посты</h1>
 <a th:href="@{/feed}" th:text="@{На главную}"></a>
-<br>
+<br/>
 <button class="btn-add" onclick="toggleForm()">Добавить пост</button>
 <!-- Скрываемая форма для добавления нового поста -->
 <div class="form-container" style="display: none;" id="postForm">
     <h2>Добавить пост</h2>
     <form th:action="@{/feed}" method="POST" th:object="${post}" enctype="multipart/form-data">
         <label for="name">Название:</label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" required="required"/>
         <label for="file">Прикрепите картинку:</label>
-        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required="required"/>
         <!--<button type="submit">Загрузить</button>-->
         <label for="text">Текст:</label>
-        <input type="text" id="text" name="text" required>
+        <input type="text" id="text" name="text" required="required"/>
         <label for="tagsString">Теги (ввод - через запятую):</label>
-        <input type="text" id="tagsString" name="tagsString" required>
+        <input type="text" id="tagsString" name="tagsString" required="required"/>
         <button type="submit">Добавить</button>
     </form>
 </div>
@@ -121,7 +121,7 @@
     <tr>
         <td>
             <form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
-                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="_method" value="delete"/>
                 <button type="submit">Удалить</button>
             </form>
         </td>
@@ -149,44 +149,14 @@
 
 
 <div th:if="${pages != null}">
-    <br>
+    <br/>
     <span>Страницы:</span>
-    <br>
+    <br/>
 
     <p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
         <a th:href="@{/feed/pages/{postsOnPage}/{i}(postsOnPage=${pages.postsOnPage}, i=${i})}" th:text="${i} "></a>
     </p>
 </div>
-
-<!--<table th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
-    <tbody>
-    <tr>
-        <th>Страница</th>
-        <td>
-&lt;!&ndash;            <input type="hidden" name="postsOnPage" th:value="${pages.postsOnPage}">
-            <input type="hidden" name="pageNumber" th:value="${i}">&ndash;&gt;
-            <a th:href="@{/feed/pages}" th:text="${i}"></a>
-        </td>
-    </tr>
-    </tbody>
-</table>-->
-
-<!--<p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
-<p th:text="${i}"></p>
-&lt;!&ndash;<input type="hidden" name="postsOnPage" value="${pages.postsOnPage}">
-<input type="hidden" name="pageNumber" value="${i}">
-<a th:href="@{/feed/pages}"></a>&ndash;&gt;
-</p>-->
-
-<!--<tr th:each="page : ${pages}">
-    <td>
-        <th th:text=${page}></th>
-<a th:href="@{/feed/post/{id}(id=${postDto.id})}" th:text="${postDto.name}"></a>
-
-    </td>
-</tr>-->
-
-<!--<span th:text="${pages} ? ${pages.numberOfPages}: '1'">pages</span>-->
 
 <script>
     function toggleForm() {

@@ -4,5 +4,11 @@
     <file url="file://$PROJECT_DIR$/README.md" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/configuration/DataSourceConfiguration.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/controller/PostControllerTest.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/dto/PostDtoTest.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/mapper/PostMapperTest.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/repository/PostRepositoryTest.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/yandex/practicum/service/PostServiceWithMockedRepoTest.java" charset="windows-1251" />
   </component>
 </project>

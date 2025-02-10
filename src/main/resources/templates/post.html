@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!-- Название страницы-->
     <title>Лента</title>
@@ -84,7 +84,7 @@
         <td>
             <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDto.id}, commentId=${comment.id})}"
                   method="post" style="display:inline;">
-                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="_method" value="delete"/>
                 <button type="submit">Удалить комментарий</button>
             </form>
         </td>
@@ -97,23 +97,23 @@
 </table>
 
 <form th:action="@{/feed/post/{id}/addLike(id=${postDto.id})}" method="POST">
-    <input type="hidden">
+    <input type="hidden"/>
     <button type="submit">Поставить лайк</button>
 </form>
-<br>
+<br/>
 
 <button class="btn-add" onclick="toggleForm2()">Добавить комментарий</button>
 <div class="form-container" style="display: none;" id="addComment">
     <h2>Добавить комментарий</h2>
-    <form th:action="@{/feed/post/addComment/{id}(id=${postDto.id})}" method="POST"
+    <form th:action="@{/feed/post/{id}/addComment(id=${postDto.id})}" method="POST"
           th:object="${comment}">
-        <input type="hidden">
+        <input type="hidden"/>
         <label for="text">Текст:</label>
-        <input type="text" id="text" name="text" required>
+        <input type="text" id="text" name="text" required="required"/>
         <button type="submit">Добавить комментарий</button>
     </form>
 </div>
-<br>
+<br/>
 
 <button class="btn-add" onclick="toggleForm()">Редактировать пост</button>
 <div class="form-container" style="display: none;" id="changeForm">
@@ -121,32 +121,37 @@
     <form th:action="@{/feed/post/{id}/change(id=${postDto.id})}" method="POST" th:object="${post}"
           enctype="multipart/form-data">
         <label for="name">Название:</label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" required="required"/>
         <label for="file">Прикрепите картинку:</label>
-        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+        <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required="required"/>
         <!--        <button type="submit">Загрузить</button>-->
         <label for="text">Текст:</label>
-        <input type="text" id="text" name="text" required>
+        <input type="text" id="text" name="text" required="required"/>
         <label for="tagsString">Теги:</label>
-        <input type="text" id="tagsString" name="tagsString" required>
+        <input type="text" id="tagsString" name="tagsString" required="required"/>
         <button type="submit">Заменить</button>
     </form>
 </div>
-<br>
+<br/>
 
 <form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
-    <input type="hidden" name="_method" value="delete">
+    <input type="hidden" name="_method" value="delete"/>
     <button type="submit">Удалить пост</button>
 </form>
 
-<br>
-<br>
+<br/>
+<br/>
 <a th:href="@{/feed}" th:text="@{Вернуться на главную}"></a>
 
 <script>
     function toggleForm() {
         const form = document.getElementById('changeForm');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        document.body.addEventListener('keydown', (event) => {
+            if(event.key === "Enter" &amp;&amp; (event.metaKey || event.ctrlKey)) {
+                event.target.form?.submit();
+            }
+        });
     }
 </script>
 
@@ -154,16 +159,6 @@
     function toggleForm2() {
         const form = document.getElementById('addComment');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-</script>
-
-<script>
-    function toggleForm3() {
-        document.body.addEventListener('keydown', (event) => {
-            if(event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-                event.target.form?.submit();
-            }
-        });
     }
 </script>
 
