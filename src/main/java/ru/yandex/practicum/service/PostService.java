@@ -53,6 +53,10 @@ public class PostService {
         return postRepository.changePost(PostMapper.mapToPostDto(changedPost));
     }
 
+    public PostDto changeComment(int id, int postId, String text) {
+        return postRepository.changeComment(id, postId, text);
+    }
+
     public void deletePost(int id) {
         postRepository.deletePost(id);
     }
@@ -64,6 +68,9 @@ public class PostService {
     private String mapListTextsToString(List<String> tagsTextList) {
         StringBuilder sb = new StringBuilder("('");
         for (String tagText : tagsTextList) {
+            if (!tagText.trim().startsWith("#")) {
+                sb.append("#");
+            }
             sb.append(tagText.trim()).append("','");
         }
         sb.delete(sb.length() - 2, sb.length());

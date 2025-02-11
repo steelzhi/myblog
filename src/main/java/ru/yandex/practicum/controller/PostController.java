@@ -84,6 +84,14 @@ public class PostController {
         return "redirect:/feed/post/" + id;
     }
 
+    @PostMapping(value = "/post/comment")
+    public String changeComment(@RequestParam(name = "id") int id,
+                                @RequestParam(name = "postId") int postId,
+                                @RequestParam(name = "text") String text) {
+        postService.changeComment(id, postId, text);
+        return "redirect:/feed/post/" + postId;
+    }
+
     @PostMapping(value = "/post/{id}", params = "_method=delete")
     public String deletePost(@PathVariable(name = "id") int id) {
         postService.deletePost(id);

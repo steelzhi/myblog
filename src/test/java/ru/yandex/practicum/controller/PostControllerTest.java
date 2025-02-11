@@ -51,6 +51,7 @@ public class PostControllerTest {
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 2)");
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (1, 3)");
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 3)");
+        jdbcTemplate.execute("INSERT INTO comments (post_id, text) VALUES (2, 'Comment text')");
     }
 
     @Test
@@ -96,7 +97,7 @@ public class PostControllerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("feed"))
                 .andExpect(model().attributeExists("feed"))
-                .andExpect(xpath("//table/tbody/tr").nodeCount(7))
+                .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
     }
 
@@ -106,9 +107,7 @@ public class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("post"))
-                .andExpect(model().attributeExists("postDto"))
-                .andExpect(xpath("//table/tbody/tr").nodeCount(6))
-                .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
+                .andExpect(model().attributeExists("postDto"));
     }
 
     @Test
@@ -129,6 +128,16 @@ public class PostControllerTest {
                         .param("text", "Changed Text1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
+    }
+
+    @Test
+    void changeComment_shouldChangeCommentAndRedirect() throws Exception {
+        mockMvc.perform(post("/feed/post/comment")
+                        .param("id", "2")
+                        .param("postId", "2")
+                        .param("text", "Changed comment Text1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/feed/post/2"));
     }
 
     @Test

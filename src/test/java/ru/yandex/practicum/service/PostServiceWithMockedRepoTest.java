@@ -177,6 +177,25 @@ public class PostServiceWithMockedRepoTest {
     }
 
     @Test
+
+    void changeComment() {
+        PostDto mockPostDto = new PostDto(10, "Post 10", null, "Text 10", 0, "Tag10");
+        Comment comment = new Comment(10, mockPostDto.getId(), "Comment 10");
+        mockPostDto.getCommentsList().add(comment);
+        String changedText = "Changed text 10";
+        mockPostDto.getCommentsList().get(0).setText(changedText);
+
+        Mockito.when(postRepository.changeComment(mockPostDto.getId(), comment.getId(), changedText))
+                .thenReturn(mockPostDto);
+        PostDto postDtoWithChangedComment = postService.changeComment(mockPostDto.getId(), comment.getId(), changedText);
+        assertTrue(postDtoWithChangedComment != null, "Feed doesn't contain post");
+        assertEquals(postDtoWithChangedComment, mockPostDto, "Post wasn't changed or was changed incorrectly");
+
+        Mockito.verify(postRepository, times(1)).changeComment(mockPostDto.getId(), comment.getId(), changedText);
+    }
+
+
+    @Test
     void testDeletePost() {
         postService.deletePost(1);
         Mockito.verify(postRepository, times(1)).deletePost(1);

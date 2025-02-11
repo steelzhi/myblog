@@ -44,6 +44,7 @@ public class PostRepositoryTest {
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 2)");
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (1, 3)");
         jdbcTemplate.execute("INSERT INTO posts_tags (post_id, tag_id) VALUES (2, 3)");
+        jdbcTemplate.execute("INSERT INTO comments (post_id, text) VALUES (2, 'Comment text')");
     }
 
     @Test
@@ -133,6 +134,17 @@ public class PostRepositoryTest {
         assertEquals(changedPostDto1.getName(), postDto1.getName(), "Name was changed incorrect");
         assertEquals(changedPostDto1.getText(), postDto1.getText(), "Text was changed incorrect");
         assertEquals(changedPostDto1.getTagsTextList(), postDto1.getTagsTextList(), "Tags were changed incorrectly");
+    }
+
+    @Test
+    void changeComment_shouldChangeComment() {
+        PostDto postDto2 = postRepository.getPostById(2);
+        Comment comment = postDto2.getCommentsList().get(0);
+        //comment.setText("Changed comment text");
+        String changedText = "Changed comment text";
+        PostDto postDto2WithChangedComment = postRepository.changeComment(postDto2.getId(), comment.getId(), changedText);
+        assertTrue(postDto2WithChangedComment != null, "After changing comment post doesn't exist anymore");
+        assertEquals(postDto2WithChangedComment.getCommentsList().get(0).getText(), changedText, "Text was changed incorrectly");
     }
 
     @Test

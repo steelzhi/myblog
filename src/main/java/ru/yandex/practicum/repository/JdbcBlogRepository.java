@@ -131,6 +131,12 @@ public class JdbcBlogRepository implements PostRepository {
     }
 
     @Override
+    public PostDto changeComment(int postId, int commentId, String commentText) {
+        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ? AND post_id = ?", commentText, commentId, postId);
+        return getPostById(postId);
+    }
+
+    @Override
     public void deletePost(int id) {
         jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
     }

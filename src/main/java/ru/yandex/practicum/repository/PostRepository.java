@@ -52,6 +52,7 @@ public interface PostRepository {
     PostDto getPostById(int id);
     List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber);
     PostDto changePost(PostDto newPostDto);
+    PostDto changeComment(int postId, int commentId, String commentText);
     void deletePost(int id);
     PostDto deleteComment(int postDtoId, int commentId);
 }

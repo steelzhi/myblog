@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Название страницы-->
     <title>Лента</title>
@@ -80,7 +81,12 @@
     </tr>
     <tr th:each="comment : ${postDto.commentsList}">
         <th>Комментарий</th>
-        <td contenteditable="true" th:text="${comment.text}"/>
+        <td id="cellToObserve"
+            contenteditable=true
+            th:text="${comment.text}"
+            th:attr="post-id=${postDto.id},comment-id=${comment.id}"
+            onkeydown="toggleForm3(event)">
+        </td>
         <td>
             <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDto.id}, commentId=${comment.id})}"
                   method="post" style="display:inline;">
@@ -146,11 +152,6 @@
     function toggleForm() {
         const form = document.getElementById('changeForm');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        document.body.addEventListener('keydown', (event) => {
-            if(event.key === "Enter" &amp;&amp; (event.metaKey || event.ctrlKey)) {
-                event.target.form?.submit();
-            }
-        });
     }
 </script>
 
@@ -158,6 +159,38 @@
     function toggleForm2() {
         const form = document.getElementById('addComment');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<script>
+    function toggleForm3(event) {
+        if(event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+            event.preventDefault();
+            const currElement = event.currentTarget;
+            console.log("Элемент" + currElement);
+            console.log("Значение" + currElement.value);
+
+            const postIdParameter = currElement.getAttribute("post-id");
+            console.log("postIdParameter:", postIdParameter);
+            const commentIdParameter = currElement.getAttribute("comment-id");
+            console.log("commentIdParameter:", commentIdParameter);
+            const commentTextParameter = currElement.innerText;
+            console.log("commentTextParameter:", commentTextParameter);
+
+            var dataReq = {}
+		    dataReq["id"] = commentIdParameter;
+		    dataReq["postId"] = postIdParameter;
+		    dataReq["text"] = commentTextParameter;
+
+            $.ajax({
+                url: '/myblog/feed/post/comment',
+                method: 'POST',
+                data : dataReq,
+			    error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
     }
 </script>
 
