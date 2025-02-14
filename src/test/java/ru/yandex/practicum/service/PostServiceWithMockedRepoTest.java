@@ -26,9 +26,11 @@ import static org.mockito.Mockito.*;
 public class PostServiceWithMockedRepoTest {
     Post post = new Post(0, "Post1", null, "Text1", "Tag1");
     PostDto mockPostDto1WithoutId = PostMapper.mapToPostDto(post);
-    PostDto mockPostDto1WithId = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+    PostDto mockPostDto1WithId
+            = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
 
-    PostDto mockPostDto2 = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
+    PostDto mockPostDto2
+            = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
 
     @Autowired
     PostService postService;
@@ -59,7 +61,8 @@ public class PostServiceWithMockedRepoTest {
 
     @Test
     void testAddLike() {
-        PostDto mockPostDto1WithLike = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto mockPostDto1WithLike
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         Mockito.when(postRepository.addLike(mockPostDto1WithLike.getId()))
                 .thenReturn(mockPostDto1WithLike);
 
@@ -72,7 +75,8 @@ public class PostServiceWithMockedRepoTest {
 
     @Test
     void testAddComment() {
-        PostDto mockPostDtoWithComment = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto mockPostDtoWithComment
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         Comment comment = new Comment(0, 1, "Comment");
         mockPostDtoWithComment.getCommentsList().add(comment);
         Mockito.when(postRepository.addComment(mockPostDtoWithComment.getId(), comment.getText()))
@@ -88,8 +92,10 @@ public class PostServiceWithMockedRepoTest {
 
     @Test
     void testGetSortedFeed() {
-        PostDto mockPostDto1WithId = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        PostDto mockPostDto2WithId = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
+        PostDto mockPostDto1WithId
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDto2WithId
+                = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
         Mockito.when(postRepository.getSortedFeed())
                 .thenReturn(List.of(mockPostDto2WithId, mockPostDto1WithId));
 
@@ -106,8 +112,10 @@ public class PostServiceWithMockedRepoTest {
     void testGetFeedWithChosenTags() {
         String tagString1 = "#Tag1";
         String tagString2 = "#Tag2";
-        PostDto mockPostDto1WithId = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        PostDto mockPostDto2WithId = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
+        PostDto mockPostDto1WithId
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDto2WithId
+                = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
         Mockito.when(postRepository.getFeedWithChosenTags("('" + tagString1 + "')"))
                 .thenReturn(List.of(mockPostDto1WithId));
         Mockito.when(postRepository.getFeedWithChosenTags("('" + tagString1 + "','" + tagString2 + "')"))
@@ -121,13 +129,16 @@ public class PostServiceWithMockedRepoTest {
         assertTrue(postDtosWithTag2.size() == 2, "Feed should contain 2 posts");
         assertEquals(postDtosWithTag2.get(0), mockPostDto2WithId, "First post in the feed should have id = 2");
 
-        Mockito.verify(postRepository, times(1)).getFeedWithChosenTags("('" + tagString1 + "')");
-        Mockito.verify(postRepository, times(1)).getFeedWithChosenTags("('" + tagString1 + "','" + tagString2 + "')");
+        Mockito.verify(postRepository, times(1))
+                .getFeedWithChosenTags("('" + tagString1 + "')");
+        Mockito.verify(postRepository, times(1))
+                .getFeedWithChosenTags("('" + tagString1 + "','" + tagString2 + "')");
     }
 
     @Test
     void testGetPostById() {
-        PostDto mockPostDto1WithId = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDto1WithId
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
         Mockito.when(postRepository.getPostById(1))
                 .thenReturn(mockPostDto1WithId);
 
@@ -140,9 +151,12 @@ public class PostServiceWithMockedRepoTest {
 
     @Test
     void testGetFeedSplittedByPages() {
-        PostDto mockPostDto1WithId = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        PostDto mockPostDto2WithId = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
-        PostDto mockPostDto3WithId = new PostDto(3, "Post3", null, "Text3", 0, "#Tag3");
+        PostDto mockPostDto1WithId
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDto2WithId
+                = new PostDto(2, "Post2", null, "Text2", 0, "#Tag2");
+        PostDto mockPostDto3WithId
+                = new PostDto(3, "Post3", null, "Text3", 0, "#Tag3");
         Mockito.when(postRepository.getFeedSplittedByPages(2, 1))
                 .thenReturn(List.of(mockPostDto3WithId, mockPostDto2WithId));
         Mockito.when(postRepository.getFeedSplittedByPages(2, 2))
@@ -158,8 +172,10 @@ public class PostServiceWithMockedRepoTest {
         assertTrue(postDtosSplittedByPagesPage2.size() == 1, "Page should have 1 post");
         assertEquals(postDtosSplittedByPagesPage2.get(0), mockPostDto1WithId, "Page should have post # 1");
 
-        Mockito.verify(postRepository, times(1)).getFeedSplittedByPages(2, 1);
-        Mockito.verify(postRepository, times(1)).getFeedSplittedByPages(2, 2);
+        Mockito.verify(postRepository, times(1))
+                .getFeedSplittedByPages(2, 1);
+        Mockito.verify(postRepository, times(1))
+                .getFeedSplittedByPages(2, 2);
     }
 
     @Test
@@ -179,7 +195,8 @@ public class PostServiceWithMockedRepoTest {
     @Test
 
     void changeComment() {
-        PostDto mockPostDto = new PostDto(10, "Post 10", null, "Text 10", 0, "Tag10");
+        PostDto mockPostDto
+                = new PostDto(10, "Post 10", null, "Text 10", 0, "Tag10");
         Comment comment = new Comment(10, mockPostDto.getId(), "Comment 10");
         mockPostDto.getCommentsList().add(comment);
         String changedText = "Changed text 10";
@@ -187,11 +204,13 @@ public class PostServiceWithMockedRepoTest {
 
         Mockito.when(postRepository.changeComment(mockPostDto.getId(), comment.getId(), changedText))
                 .thenReturn(mockPostDto);
-        PostDto postDtoWithChangedComment = postService.changeComment(mockPostDto.getId(), comment.getId(), changedText);
+        PostDto postDtoWithChangedComment
+                = postService.changeComment(mockPostDto.getId(), comment.getId(), changedText);
         assertTrue(postDtoWithChangedComment != null, "Feed doesn't contain post");
         assertEquals(postDtoWithChangedComment, mockPostDto, "Post wasn't changed or was changed incorrectly");
 
-        Mockito.verify(postRepository, times(1)).changeComment(mockPostDto.getId(), comment.getId(), changedText);
+        Mockito.verify(postRepository, times(1))
+                .changeComment(mockPostDto.getId(), comment.getId(), changedText);
     }
 
 
@@ -203,10 +222,12 @@ public class PostServiceWithMockedRepoTest {
 
     @Test
     void testDeleteComment() {
-        PostDto mockPostDtoWithComment = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDtoWithComment
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
         Comment comment = new Comment(1, 1, "Comment");
         mockPostDtoWithComment.getCommentsList().add(comment);
-        PostDto mockPostDtoWithoutComment = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
+        PostDto mockPostDtoWithoutComment
+                = new PostDto(1, "Post1", null, "Text1", 0, "#Tag1");
         Mockito.when(postRepository.deleteComment(mockPostDtoWithoutComment.getId(), comment.getId()))
                 .thenReturn(mockPostDtoWithoutComment);
 
@@ -214,7 +235,8 @@ public class PostServiceWithMockedRepoTest {
         assertTrue(postDtoWithoutComment != null, "Post should exist after comment deleting");
         assertTrue(postDtoWithoutComment.getCommentsList().isEmpty(), "Comments list should be empty");
 
-        Mockito.verify(postRepository, times(1)).deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
+        Mockito.verify(postRepository, times(1))
+                .deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
     }
 
     @Configuration

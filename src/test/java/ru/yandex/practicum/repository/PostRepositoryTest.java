@@ -49,7 +49,8 @@ public class PostRepositoryTest {
 
     @Test
     void addPostDto_shouldAddPostDtoToDatabase() {
-        PostDto postDto = new PostDto(0, "Post3", null, "Text3", 0, "#Tag1");
+        PostDto postDto = new PostDto(
+                0, "Post3", null, "Text3", 0, "#Tag1");
         PostDto savedPostDto = postRepository.addPostDto(postDto);
         assertNotNull(savedPostDto);
         assertEquals(postDto.getName(), savedPostDto.getName(), "Post names don't match");
@@ -74,8 +75,10 @@ public class PostRepositoryTest {
         assertTrue(postDto1.getCommentsList().isEmpty(), "Comments list must be empty");
         postRepository.addComment(postDto1.getId(), comment.getText());
         PostDto postDto1WithComment = postRepository.getPostById(1);
-        assertEquals(postDto1WithComment.getCommentsList().size(), 1, "Comments list must contain 1 comment");
-        assertEquals(postDto1WithComment.getCommentsList().get(0).getText(), comment.getText(), "Comment text was added incorrectly");
+        assertEquals(postDto1WithComment.getCommentsList().size(), 1,
+                "Comments list must contain 1 comment");
+        assertEquals(postDto1WithComment.getCommentsList().get(0).getText(), comment.getText(),
+                "Comment text was added incorrectly");
     }
 
     @Test
@@ -93,7 +96,8 @@ public class PostRepositoryTest {
         List<PostDto> feedWithChosenTag1 = postRepository.getFeedWithChosenTags(tagString1);
         assertTrue(feedWithChosenTag1.size() == 1, "Feed should contain 1 post with #Tag1");
         List<PostDto> feedWithChosenTags2AndCommon = postRepository.getFeedWithChosenTags(tagString2);
-        assertTrue(feedWithChosenTags2AndCommon.size() == 2, "Feed should contain 2 posts with #Tag2 and #CommonTag");
+        assertTrue(feedWithChosenTags2AndCommon.size() == 2,
+                "Feed should contain 2 posts with #Tag2 and #CommonTag");
     }
 
     @Test
@@ -113,15 +117,19 @@ public class PostRepositoryTest {
         PostDto postDto2 = postRepository.getPostById(2);
         PostDto firstPostInFeedSplittedBy2Pages1 = feedSplittedBy2Pages1.get(0);
         PostDto secondPostInFeedSplittedBy2Pages1 = feedSplittedBy2Pages1.get(1);
-        assertEquals(firstPostInFeedSplittedBy2Pages1.getName(), postDto3.getName(), "First on page 1 should be post 3");
-        assertEquals(secondPostInFeedSplittedBy2Pages1.getText(), postDto2.getText(), "Second on page 1 should be post 2");
+        assertEquals(firstPostInFeedSplittedBy2Pages1.getName(), postDto3.getName(),
+                "First on page 1 should be post 3");
+        assertEquals(secondPostInFeedSplittedBy2Pages1.getText(), postDto2.getText(),
+                "Second on page 1 should be post 2");
 
         List<PostDto> feedSplittedBy2Pages2 = postRepository.getFeedSplittedByPages(2, 2);
         assertTrue(feedSplittedBy2Pages2.size() == 1, "Second page should contain 2 posts");
         PostDto postDto1 = postRepository.getPostById(1);
         PostDto firstPostInFeedSplittedBy2Pages2 = feedSplittedBy2Pages2.get(0);
-        assertEquals(firstPostInFeedSplittedBy2Pages2.getName(), postDto1.getName(), "First on page 2 should be post 1");
-        assertEquals(firstPostInFeedSplittedBy2Pages2.getText(), postDto1.getText(), "First on page 2 should be post 1");
+        assertEquals(firstPostInFeedSplittedBy2Pages2.getName(), postDto1.getName(),
+                "First on page 2 should be post 1");
+        assertEquals(firstPostInFeedSplittedBy2Pages2.getText(), postDto1.getText(),
+                "First on page 2 should be post 1");
     }
 
     @Test
@@ -133,7 +141,8 @@ public class PostRepositoryTest {
         PostDto changedPostDto1 = postRepository.changePost(postDto1);
         assertEquals(changedPostDto1.getName(), postDto1.getName(), "Name was changed incorrect");
         assertEquals(changedPostDto1.getText(), postDto1.getText(), "Text was changed incorrect");
-        assertEquals(changedPostDto1.getTagsTextList(), postDto1.getTagsTextList(), "Tags were changed incorrectly");
+        assertEquals(changedPostDto1.getTagsTextList(), postDto1.getTagsTextList(),
+                "Tags were changed incorrectly");
     }
 
     @Test
@@ -142,9 +151,12 @@ public class PostRepositoryTest {
         Comment comment = postDto2.getCommentsList().get(0);
         //comment.setText("Changed comment text");
         String changedText = "Changed comment text";
-        PostDto postDto2WithChangedComment = postRepository.changeComment(postDto2.getId(), comment.getId(), changedText);
-        assertTrue(postDto2WithChangedComment != null, "After changing comment post doesn't exist anymore");
-        assertEquals(postDto2WithChangedComment.getCommentsList().get(0).getText(), changedText, "Text was changed incorrectly");
+        PostDto postDto2WithChangedComment
+                = postRepository.changeComment(comment.getId(), postDto2.getId(), changedText);
+        assertTrue(postDto2WithChangedComment != null,
+                "After changing comment post doesn't exist anymore");
+        assertEquals(postDto2WithChangedComment.getCommentsList().get(0).getText(), changedText,
+                "Text was changed incorrectly");
     }
 
     @Test
@@ -163,7 +175,8 @@ public class PostRepositoryTest {
         postDto1.getCommentsList().add(comment);
         assertTrue(postDto1.getCommentsList().contains(comment));
         PostDto postDto1WithoutComment = postRepository.deleteComment(postDto1.getId(), comment.getId());
-        assertFalse(postDto1WithoutComment.getCommentsList().contains(comment), "Post 1 comments list shouldn't contain comment 1");
+        assertFalse(postDto1WithoutComment.getCommentsList().contains(comment),
+                "Post 1 comments list shouldn't contain comment 1");
         assertTrue(postDto1WithoutComment.getCommentsList().isEmpty(), "Post 1 comments list should be empty");
     }
 

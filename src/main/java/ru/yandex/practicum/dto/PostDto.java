@@ -63,7 +63,14 @@ public class PostDto {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PostDto postDto = (PostDto) o;
-        return id == postDto.id && numberOfLikes == postDto.numberOfLikes && Objects.equals(name, postDto.name) && Objects.equals(base64Image, postDto.base64Image) && Objects.equals(preview, postDto.preview) && Objects.equals(text, postDto.text) && Objects.equals(tagsTextList, postDto.tagsTextList) && Objects.equals(commentsList, postDto.commentsList);
+        return id == postDto.id
+                && numberOfLikes == postDto.numberOfLikes
+                && Objects.equals(name, postDto.name)
+                && Objects.equals(base64Image, postDto.base64Image)
+                && Objects.equals(preview, postDto.preview)
+                && Objects.equals(text, postDto.text)
+                && Objects.equals(tagsTextList, postDto.tagsTextList)
+                && Objects.equals(commentsList, postDto.commentsList);
     }
 
     @Override

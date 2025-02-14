@@ -23,8 +23,11 @@ public class PostDtoTest {
 
     @Test
     void testCorrectPreview() {
-        PostDto postDto1 = new PostDto(0, "Post", null, "TextTextText", 0,"#Tag1");
-        assertTrue(postDto1.getPreview().length() <= PostDto.TEXT_MAX_LENGTH_FOR_PREVIEW, "Preview length should not exceed limit length");
-        assertTrue(postDto1.getPreview().equals(postDto1.getText().substring(0, PostDto.TEXT_MAX_LENGTH_FOR_PREVIEW)), "Preview length should not exceed limit length");
+        PostDto postDto1 = new PostDto(
+                0, "Post", null, "TextTextText", 0,"#Tag1");
+        assertTrue(postDto1.getPreview().length() <= PostDto.TEXT_MAX_LENGTH_FOR_PREVIEW,
+                "Preview length should not exceed limit length");
+        assertTrue(postDto1.getPreview().equals(postDto1.getText().substring(0, PostDto.TEXT_MAX_LENGTH_FOR_PREVIEW)),
+                "Preview length should not exceed limit length");
     }
 }

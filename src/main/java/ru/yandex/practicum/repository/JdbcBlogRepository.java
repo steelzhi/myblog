@@ -1,6 +1,7 @@
 package ru.yandex.practicum.repository;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,12 +10,47 @@ import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.model.PostTag;
 import ru.yandex.practicum.model.Tag;
 
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
 @Primary
 public class JdbcBlogRepository implements PostRepository {
+    RowMapper<PostDto> MAP_TO_POSTDTO = (ResultSet resultSet, int rowNum) -> new PostDto(
+            resultSet.getInt("id"),
+            resultSet.getString("name"),
+            resultSet.getString("base_64_image"),
+            resultSet.getString("text"),
+            resultSet.getInt("number_of_likes"),
+            null);
+
+    RowMapper<Comment> MAP_TO_COMMENTS = (ResultSet resultSet, int rowNum) -> new Comment(
+            resultSet.getInt("id"),
+            resultSet.getInt("post_id"),
+            resultSet.getString("text"));
+
+    RowMapper<Tag> MAP_TO_TAG = (ResultSet resultSet, int rowNum) -> new Tag(
+            resultSet.getInt("id"),
+            resultSet.getString("text"));
+
+    RowMapper<Integer> MAP_TO_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+            resultSet.getInt("id"));
+
+    RowMapper<Integer> MAP_TO_TAG_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+            resultSet.getInt("tag_id"));
+
+    RowMapper<Integer> MAP_TO_POST_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+            resultSet.getInt("post_id"));
+
+    RowMapper<String> MAP_TO_TEXT = (ResultSet resultSet, int rowNum) -> new String(
+            resultSet.getString("text"));
+
+    RowMapper<PostTag> MAP_TO_POST_TAG = (ResultSet resultSet, int rowNum) -> new PostTag(
+            resultSet.getInt("id"),
+            resultSet.getInt("post_id"),
+            resultSet.getInt("tag_id"));
+
     @Autowired
     private final JdbcTemplate jdbcTemplate;
 
@@ -64,7 +100,7 @@ public class JdbcBlogRepository implements PostRepository {
     public List<PostDto> getSortedFeed() {
         List<PostDto> postDtosList = jdbcTemplate.query(
                 """
-                        SELECT * 
+                        SELECT id, name, base_64_image, text, number_of_likes 
                         FROM posts p
                         """, MAP_TO_POSTDTO);
         return getPostDtoListWithCommentsAndTags(postDtosList);
@@ -73,7 +109,8 @@ public class JdbcBlogRepository implements PostRepository {
     @Override
     public List<PostDto> getFeedWithChosenTags(String tagsInString) {
         List<Integer> postDtosIdsWithTags = jdbcTemplate.query(
-                "SELECT post_id FROM posts_tags pt LEFT JOIN tags t ON t.id = pt.tag_id WHERE t.text IN " + tagsInString + " ORDER BY post_id DESC", MAP_TO_POST_ID
+                "SELECT post_id FROM posts_tags pt LEFT JOIN tags t ON t.id = pt.tag_id WHERE t.text IN "
+                        + tagsInString + " ORDER BY post_id DESC", MAP_TO_POST_ID
         );
 
         if (postDtosIdsWithTags.isEmpty()) {
@@ -83,7 +120,7 @@ public class JdbcBlogRepository implements PostRepository {
         String postDtosIdsInString = mapListIdsToString(postDtosIdsWithTags);
         List<PostDto> selectedPostDtosList = jdbcTemplate.query(
                 """
-                        SELECT *
+                        SELECT id, name, base_64_image, text, number_of_likes 
                         FROM posts
                         WHERE id IN 
                         """ + postDtosIdsInString, MAP_TO_POSTDTO
@@ -93,8 +130,7 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostDto getPostById(int id) {
-        List<PostDto> postDtoList = getSortedFeed();
-        String query = "SELECT * FROM posts WHERE id = " + id + ";";
+        String query = "SELECT id, name, base_64_image, text, number_of_likes FROM posts WHERE id = " + id + ";";
         PostDto postDto = jdbcTemplate.query(query, MAP_TO_POSTDTO).get(0);
         List<Comment> commentList = getAllCommentsForPost(postDto.getId());
         postDto.getCommentsList().addAll(commentList);
@@ -103,10 +139,16 @@ public class JdbcBlogRepository implements PostRepository {
         return postDto;
     }
 
+    /*
+    * Игорь, по этому методу Вы оставили такой комментарий: "Метод getFeedSplittedByPages нужен только чтобы
+    * получить размер". Не смог его понять - этот метод же у меня выбирает из БД посты (только те, которые будут
+    * отображены согласно параметрам пагинации).
+     */
     @Override
     public List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
         List<PostDto> postDtosList = jdbcTemplate.query(
-                "SELECT * FROM posts p ORDER BY id DESC LIMIT " + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1),
+                "SELECT id, name, base_64_image, text, number_of_likes FROM posts p ORDER BY id DESC LIMIT "
+                        + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1),
                 MAP_TO_POSTDTO);
         return getPostDtoListWithCommentsAndTags(postDtosList);
     }
@@ -124,15 +166,18 @@ public class JdbcBlogRepository implements PostRepository {
                         SET name = ?, base_64_image = ?, text = ?
                         WHERE id = ?
                         """,
-                changedPostDto.getName(), changedPostDto.getBase64Image(), changedPostDto.getText(), changedPostDto.getId());
+                changedPostDto.getName(),
+                changedPostDto.getBase64Image(),
+                changedPostDto.getText(),
+                changedPostDto.getId());
 
         addNewTags(changedPostDto);
         return getPostById(changedPostDto.getId());
     }
 
     @Override
-    public PostDto changeComment(int postId, int commentId, String commentText) {
-        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ? AND post_id = ?", commentText, commentId, postId);
+    public PostDto changeComment(int id, int postId, String text) {
+        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ? AND post_id = ?", text, id, postId);
         return getPostById(postId);
     }
 
@@ -171,7 +216,7 @@ public class JdbcBlogRepository implements PostRepository {
     private Map<Integer, String> getTagsMap() {
         List<Tag> tagList = jdbcTemplate.query(
                 """
-                        SELECT *
+                        SELECT id, text
                         FROM tags
                         """, MAP_TO_TAG);
         Map<Integer, String> tagMap = tagList.stream()
@@ -182,7 +227,7 @@ public class JdbcBlogRepository implements PostRepository {
 
     private List<PostTag> getPostsTagsList() {
         return jdbcTemplate.query("""
-                SELECT *
+                SELECT id, post_id, tag_id
                 FROM posts_tags
                 """, MAP_TO_POST_TAG);
     }
@@ -229,7 +274,7 @@ public class JdbcBlogRepository implements PostRepository {
         Map<Integer, List<Comment>> comments = new HashMap<>();
         List<Comment> commentList = jdbcTemplate.query(
                 """
-                        SELECT *
+                        SELECT id, text, post_id
                         FROM comments
                         """, MAP_TO_COMMENTS);
         for (Comment c : commentList) {
@@ -245,7 +290,7 @@ public class JdbcBlogRepository implements PostRepository {
     private List<Comment> getAllCommentsForPost(long postId) {
         List<Comment> commentList = jdbcTemplate.query(
                 """
-                        SELECT *
+                        SELECT id, text, post_id
                         FROM comments
                         WHERE post_id = 
                         """ + postId, MAP_TO_COMMENTS);
