@@ -183,7 +183,7 @@
 		    dataReq["text"] = commentTextParameter;
 
             $.ajax({
-                url: '/myblog/feed/post/comment',
+                url: '/feed/post/comment',
                 method: 'POST',
                 data : dataReq,
 			    error: function(xhr, status, error) {

@@ -1,7 +1,8 @@
 package ru.yandex.practicum.dto;
 
-/*import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;*/
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PostDtoTest {
-    //@ParametirezedTest
 
     @Test
     void testCorrectMappingTagsFromStringToList() {
