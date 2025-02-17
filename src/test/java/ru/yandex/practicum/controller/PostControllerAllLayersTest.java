@@ -1,7 +1,6 @@
 package ru.yandex.practicum.controller;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,9 +17,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -97,13 +95,16 @@ public class PostControllerAllLayersTest {
 
         PostDto addedPostDto = postRepository.getPostById(1);
         assertEquals(addedPostDto.getCommentsList().size(), 1, "Post should have 1 comment");
-        assertEquals(addedPostDto.getCommentsList().getFirst().getText(), comment.getText(), "Comment text was saved incorrectly");
+        assertEquals(addedPostDto.getCommentsList().getFirst().getText(), comment.getText(),
+                "Comment text was saved incorrectly");
     }
 
     @Test
     void getFeed_shouldReturnHtmlWithFeed() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2 = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto2
+                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
 
@@ -118,8 +119,10 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getFeedWithChosenTags_shouldReturnHtmlWithFeedWithChosenTags() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2 = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto2
+                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
 
@@ -135,7 +138,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getPostById_shouldReturnPostById() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(get("/feed/post/1"))
@@ -147,9 +151,12 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getFeedSplittedByPages_shouldReturnFeedSplittedBy2Pages() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2 = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
-        PostDto postDto3 = new PostDto(3, "Post3", null, "Text3", 1, "#Tag3");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto2
+                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
+        PostDto postDto3
+                = new PostDto(3, "Post3", null, "Text3", 1, "#Tag3");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
         postRepository.addPostDto(postDto3);
@@ -166,7 +173,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void changePost_shouldChangePostAndRedirect() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(post("/feed/post/1/change")
@@ -182,7 +190,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void changeComment_shouldChangeCommentAndRedirect() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         postRepository.addPostDto(postDto1);
         Comment comment = new Comment(1, 1, "new comment");
         postRepository.addComment(1, comment.getText());
@@ -201,7 +210,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void deletePost_shouldDeletePostAndRedirect() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(post("/feed/post/1")
@@ -214,7 +224,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void deleteComment_shouldDeleteCommentAndRedirect() throws Exception {
-        PostDto postDto1 = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostDto postDto1
+                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
         Comment comment = new Comment(1, 1, "new comment");
         postDto1.getCommentsList().add(comment);
         postRepository.addPostDto(postDto1);
