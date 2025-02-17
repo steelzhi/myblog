@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-public class PostControllerTest {
+public class PostControllerWebLayerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -197,6 +197,5 @@ public class PostControllerTest {
                 .andExpect(redirectedUrl("/feed/post/1"));
 
         verify(postService, times(1)).deleteComment(1, 1);
-
     }
 }

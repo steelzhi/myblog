@@ -31,4 +31,6 @@ public interface PostRepository {
     void deletePost(int id);
 
     PostDto deleteComment(int postDtoId, int commentId);
+
+    void cleanAllDataBase();
 }

@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.mapper.PostMapper;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
-import ru.yandex.practicum.repository.JdbcBlogRepository;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.io.IOException;

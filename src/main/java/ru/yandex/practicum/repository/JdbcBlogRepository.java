@@ -213,6 +213,15 @@ public class JdbcBlogRepository implements PostRepository {
         return getPostById(postDtoId);
     }
 
+    // Метод для тестирования (зачищаем БД из объектной модели)
+    @Override
+    public void cleanAllDataBase() {
+        jdbcTemplate.execute("DELETE FROM posts_tags");
+        jdbcTemplate.execute("DELETE FROM comments");
+        jdbcTemplate.execute("DELETE FROM posts");
+        jdbcTemplate.execute("DELETE FROM tags");
+    }
+
     private Map<Integer, String> getTagsMap() {
         List<Tag> tagList = jdbcTemplate.query(
                 """
