@@ -29,3 +29,6 @@
 
 // файл .jar запускается в консоли с указанием полного пути файла (на моем ПК - C:\dev\myblog-boot\build\libs\myblog-boot-0.0.1-SNAPSHOT.jar):
 // java -jar C:\dev\myblog-boot\build\libs\myblog-boot-0.0.1-SNAPSHOT.jar
+
+// Запуск "gradle clean build" (через wrapper - "./gradlew clean build")
+// Путь: localhost:8080/feed

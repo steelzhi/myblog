@@ -1,13 +1,10 @@
-/*
 package ru.yandex.practicum.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.yandex.practicum.configuration.DataSourceConfiguration;
 import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.model.Comment;
 
@@ -15,8 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfiguration.class, JdbcBlogRepository.class})
-@TestPropertySource(locations = "classpath:test-application.properties")
+@SpringBootTest
 public class PostRepositoryTest {
 
     @Autowired
@@ -180,6 +176,4 @@ public class PostRepositoryTest {
                 "Post 1 comments list shouldn't contain comment 1");
         assertTrue(postDto1WithoutComment.getCommentsList().isEmpty(), "Post 1 comments list should be empty");
     }
-
 }
-*/

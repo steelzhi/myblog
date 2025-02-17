@@ -1,29 +1,26 @@
-/*
 package ru.yandex.practicum.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.mapper.PostMapper;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
+import ru.yandex.practicum.repository.JdbcBlogRepository;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = PostServiceWithMockedRepoTest.TestConfig.class)
+@SpringBootTest(classes = PostService.class)
 public class PostServiceWithMockedRepoTest {
     Post post = new Post(0, "Post1", null, "Text1", "Tag1");
     PostDto mockPostDto1WithoutId = PostMapper.mapToPostDto(post);
@@ -36,7 +33,7 @@ public class PostServiceWithMockedRepoTest {
     @Autowired
     PostService postService;
 
-    @Autowired
+    @MockitoBean
     PostRepository postRepository;
 
     public PostServiceWithMockedRepoTest() throws IOException {
@@ -45,7 +42,6 @@ public class PostServiceWithMockedRepoTest {
     @BeforeEach
     void setUp() {
         Mockito.reset(postRepository);
-
     }
 
     @Test
@@ -239,19 +235,4 @@ public class PostServiceWithMockedRepoTest {
         Mockito.verify(postRepository, times(1))
                 .deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
     }
-
-    @Configuration
-    static class TestConfig {
-
-        @Bean
-        public PostService postService(PostRepository postRepository) {
-            return new PostService(postRepository);
-        }
-
-        @Bean
-        public PostRepository postRepository() {
-            return mock(PostRepository.class);
-        }
-    }
 }
-*/
