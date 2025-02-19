@@ -15,7 +15,7 @@ import java.util.Objects;
 public class PostDto {
     private int id;
     private String name;
-    private String base64Image;
+    private byte[] image;
     private String preview;
     private String text;
     private int numberOfLikes;
@@ -23,10 +23,10 @@ public class PostDto {
     private List<Comment> commentsList = new ArrayList<>();
     public static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
 
-    public PostDto(int id, String name, String base64Image, String text, int numberOfLikes, String tagsString) {
+    public PostDto(int id, String name, byte[] image, String text, int numberOfLikes, String tagsString) {
         this.id = id;
         this.name = name;
-        this.base64Image = base64Image;
+        this.image = image;
         this.text = text;
         this.numberOfLikes = numberOfLikes;
         tagsTextList = mapTagsFromStringAndAddThemToList(tagsString);
@@ -66,7 +66,7 @@ public class PostDto {
         return id == postDto.id
                 && numberOfLikes == postDto.numberOfLikes
                 && Objects.equals(name, postDto.name)
-                && Objects.equals(base64Image, postDto.base64Image)
+                && Objects.equals(image, postDto.image)
                 && Objects.equals(preview, postDto.preview)
                 && Objects.equals(text, postDto.text)
                 && Objects.equals(tagsTextList, postDto.tagsTextList)
@@ -75,6 +75,6 @@ public class PostDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, base64Image, preview, text, numberOfLikes, tagsTextList, commentsList);
+        return Objects.hash(id, name, image, preview, text, numberOfLikes, tagsTextList, commentsList);
     }
 }

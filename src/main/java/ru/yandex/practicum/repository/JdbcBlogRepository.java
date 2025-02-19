@@ -20,7 +20,7 @@ public class JdbcBlogRepository implements PostRepository {
     RowMapper<PostDto> MAP_TO_POSTDTO = (ResultSet resultSet, int rowNum) -> new PostDto(
             resultSet.getInt("id"),
             resultSet.getString("name"),
-            resultSet.getString("base_64_image"),
+            resultSet.getBytes("image"),
             resultSet.getString("text"),
             resultSet.getInt("number_of_likes"),
             null);
@@ -46,6 +46,8 @@ public class JdbcBlogRepository implements PostRepository {
     RowMapper<String> MAP_TO_TEXT = (ResultSet resultSet, int rowNum) -> new String(
             resultSet.getString("text"));
 
+    RowMapper<byte[]> MAP_TO_IMAGE = (ResultSet resultSet, int rowNum) -> resultSet.getBytes("image");
+
     RowMapper<PostTag> MAP_TO_POST_TAG = (ResultSet resultSet, int rowNum) -> new PostTag(
             resultSet.getInt("id"),
             resultSet.getInt("post_id"),
@@ -60,8 +62,8 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostDto addPostDto(PostDto postDto) {
-        jdbcTemplate.update("INSERT INTO posts (name, base_64_image, text) VALUES (?, ?, ?)",
-                postDto.getName(), postDto.getBase64Image(), postDto.getText());
+        jdbcTemplate.update("INSERT INTO posts (name, image, text) VALUES (?, ?, ?)",
+                postDto.getName(), postDto.getImage(), postDto.getText());
 
         int postDtoId = jdbcTemplate.query("""
                 SELECT id
@@ -100,9 +102,10 @@ public class JdbcBlogRepository implements PostRepository {
     public List<PostDto> getSortedFeed() {
         List<PostDto> postDtosList = jdbcTemplate.query(
                 """
-                        SELECT id, name, base_64_image, text, number_of_likes 
+                        SELECT id, name, image, text, number_of_likes 
                         FROM posts p
                         """, MAP_TO_POSTDTO);
+        System.out.println();
         return getPostDtoListWithCommentsAndTags(postDtosList);
     }
 
@@ -120,7 +123,7 @@ public class JdbcBlogRepository implements PostRepository {
         String postDtosIdsInString = mapListIdsToString(postDtosIdsWithTags);
         List<PostDto> selectedPostDtosList = jdbcTemplate.query(
                 """
-                        SELECT id, name, base_64_image, text, number_of_likes 
+                        SELECT id, name, image, text, number_of_likes 
                         FROM posts
                         WHERE id IN 
                         """ + postDtosIdsInString, MAP_TO_POSTDTO
@@ -130,7 +133,7 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostDto getPostById(int id) {
-        String query = "SELECT id, name, base_64_image, text, number_of_likes FROM posts WHERE id = " + id + ";";
+        String query = "SELECT id, name, image, text, number_of_likes FROM posts WHERE id = " + id + ";";
         PostDto postDto = jdbcTemplate.query(query, MAP_TO_POSTDTO).get(0);
         List<Comment> commentList = getAllCommentsForPost(postDto.getId());
         postDto.getCommentsList().addAll(commentList);
@@ -139,15 +142,10 @@ public class JdbcBlogRepository implements PostRepository {
         return postDto;
     }
 
-    /*
-    * Игорь, по этому методу Вы оставили такой комментарий: "Метод getFeedSplittedByPages нужен только чтобы
-    * получить размер". Не смог его понять - этот метод же у меня выбирает из БД посты (только те, которые будут
-    * отображены согласно параметрам пагинации).
-     */
     @Override
     public List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
         List<PostDto> postDtosList = jdbcTemplate.query(
-                "SELECT id, name, base_64_image, text, number_of_likes FROM posts p ORDER BY id DESC LIMIT "
+                "SELECT id, name, image, text, number_of_likes FROM posts p ORDER BY id DESC LIMIT "
                         + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1),
                 MAP_TO_POSTDTO);
         return getPostDtoListWithCommentsAndTags(postDtosList);
@@ -163,11 +161,11 @@ public class JdbcBlogRepository implements PostRepository {
         jdbcTemplate.update(
                 """
                         UPDATE posts 
-                        SET name = ?, base_64_image = ?, text = ?
+                        SET name = ?, image = ?, text = ?
                         WHERE id = ?
                         """,
                 changedPostDto.getName(),
-                changedPostDto.getBase64Image(),
+                changedPostDto.getImage(),
                 changedPostDto.getText(),
                 changedPostDto.getId());
 
@@ -211,6 +209,12 @@ public class JdbcBlogRepository implements PostRepository {
                 WHERE id = ?
                 """, commentId);
         return getPostById(postDtoId);
+    }
+
+    @Override
+    public byte[] getImage(int postDtoId) {
+        byte[] image = jdbcTemplate.query("SELECT image FROM posts WHERE id = " + postDtoId, MAP_TO_IMAGE).getFirst();
+        return image;
     }
 
     // Метод для тестирования (зачищаем БД из объектной модели)

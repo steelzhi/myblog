@@ -18,7 +18,7 @@ public class PostMapperTest {
         PostDto postDto = PostMapper.mapToPostDto(post);
         assertEquals(postDto.getId(), 0, "Id should be 0");
         assertEquals(postDto.getName(), post.getName(), "Posts names should be the same");
-        assertEquals(postDto.getBase64Image(), null, "The post didn't have an image");
+        assertEquals(postDto.getImage(), null, "The post didn't have an image");
         assertEquals(postDto.getText(), post.getText(), "Posts texts should be the same");
 
         for (String tagText : postDto.getTagsTextList()) {

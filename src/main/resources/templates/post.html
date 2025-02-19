@@ -65,7 +65,7 @@
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{'data:image/jpeg;base64,'+${postDto.base64Image}}" width="400"/></td>
+        <td><img th:src="@{/{postDtoId}/image(postDtoId=${postDto.id})}" width="400"/></td>
     </tr>
     <tr>
         <th>Текст</th>

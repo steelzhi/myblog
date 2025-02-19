@@ -10,6 +10,9 @@ import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.dto.PostDto;
 import ru.yandex.practicum.model.Comment;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -179,5 +182,16 @@ public class PostRepositoryTest {
         assertFalse(postDto1WithoutComment.getCommentsList().contains(comment),
                 "Post 1 comments list shouldn't contain comment 1");
         assertTrue(postDto1WithoutComment.getCommentsList().isEmpty(), "Post 1 comments list should be empty");
+    }
+
+    @Test
+    void getImage_shouldReturnImage() throws IOException {
+        byte[] image = Files.readAllBytes(Paths.get("src/test/resources/image-byte-array.txt"));
+        jdbcTemplate.execute("UPDATE posts SET image = '" + image + "' WHERE id = 1");
+
+        byte[] imageFromDb = postRepository.getImage(1);
+
+        assertTrue(imageFromDb != null, "Post 1 should exist");
+        assertArrayEquals(imageFromDb, imageFromDb, "Image was saved or retrieved incorrectly");
     }
 }

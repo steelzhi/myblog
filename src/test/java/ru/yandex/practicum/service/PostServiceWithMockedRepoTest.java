@@ -13,6 +13,8 @@ import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -232,5 +234,18 @@ public class PostServiceWithMockedRepoTest {
 
         Mockito.verify(postRepository, times(1))
                 .deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
+    }
+
+    @Test
+    void testGetImage() throws IOException {
+        byte[] image = Files.readAllBytes(Paths.get("src/test/resources/image-byte-array.txt"));
+        Mockito.when(postRepository.getImage(1))
+                .thenReturn(image);
+
+        byte[] imageFromDb = postService.getImage(1);
+        assertNotNull(imageFromDb, "Post should exist");
+        assertArrayEquals(imageFromDb, imageFromDb, "Image was saved or retrieved incorrectly");
+
+        Mockito.verify(postRepository, times(1)).getImage(1);
     }
 }

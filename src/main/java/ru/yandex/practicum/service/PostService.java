@@ -65,6 +65,10 @@ public class PostService {
         return postRepository.deleteComment(postDtoId, commentId);
     }
 
+    public byte[] getImage(int postDtoId) {
+        return postRepository.getImage(postDtoId);
+    }
+
     private String mapListTextsToString(List<String> tagsTextList) {
         StringBuilder sb = new StringBuilder("('");
         for (String tagText : tagsTextList) {

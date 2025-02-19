@@ -32,5 +32,7 @@ public interface PostRepository {
 
     PostDto deleteComment(int postDtoId, int commentId);
 
+    byte[] getImage(int postDtoId);
+
     void cleanAllDataBase();
 }

@@ -70,7 +70,6 @@
         <input type="text" id="name" name="name" required="required"/>
         <label for="file">Прикрепите картинку:</label>
         <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required="required"/>
-        <!--<button type="submit">Загрузить</button>-->
         <label for="text">Текст:</label>
         <input type="text" id="text" name="text" required="required"/>
         <label for="tagsString">Теги (ввод - через запятую):</label>
@@ -100,7 +99,8 @@
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{'data:image/jpeg;base64,'+${postDto.base64Image}}" width="400"/></td>
+        <td><img th:src="@{/{postDtoId}/image(postDtoId=${postDto.id})}" width="400"/></td>
+        <!--<td><img th:src="@{${postDto.blob}}" width="400"/></td>-->
     </tr>
     <tr>
         <th>Превью</th>
