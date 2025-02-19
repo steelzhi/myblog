@@ -89,38 +89,38 @@
     </form>
 </div>
 
-<table th:each="postDto : ${feed}">
+<table th:each="postResponseDto : ${feed}">
     <tbody>
     <tr>
         <th>Название</th>
         <td>
-            <a th:href="@{/feed/post/{id}(id=${postDto.id})}" th:text="${postDto.name}"></a>
+            <a th:href="@{/feed/post/{id}(id=${postResponseDto.id})}" th:text="${postResponseDto.name}"></a>
         </td>
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{/{postDtoId}/image(postDtoId=${postDto.id})}" width="400"/></td>
-        <!--<td><img th:src="@{${postDto.blob}}" width="400"/></td>-->
+        <td><img th:src="@{/{postResponseDtoId}/image(postResponseDtoId=${postResponseDto.id})}" width="400"/></td>
+        <!--<td><img th:src="@{${postResponseDto.blob}}" width="400"/></td>-->
     </tr>
     <tr>
         <th>Превью</th>
-        <td th:text="${postDto.preview}"/>
+        <td th:text="${postResponseDto.preview}"/>
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDto.commentsList)}"/>
+        <td th:text="${#lists.size(postResponseDto.commentsList)}"/>
     </tr>
     <tr>
         <th>Количество лайков</th>
-        <td th:text="${postDto.numberOfLikes}"/>
+        <td th:text="${postResponseDto.numberOfLikes}"/>
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDto.tagsTextList}"/>
+        <td th:text="${postResponseDto.tagsTextList}"/>
     </tr>
     <tr>
         <td>
-            <form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
+            <form th:action="@{/feed/post/{id}(id=${postResponseDto.id})}" method="post" style="display:inline;">
                 <input type="hidden" name="_method" value="delete"/>
                 <button type="submit">Удалить</button>
             </form>

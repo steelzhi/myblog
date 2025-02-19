@@ -8,7 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.dto.PostDto;
+import ru.yandex.practicum.dto.PostRequestDto;
+import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
@@ -53,7 +54,7 @@ public class PostControllerAllLayersTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed"));
 
-        PostDto addedPostDto = postRepository.getPostById(1);
+        PostResponseDto addedPostDto = postRepository.getPostById(1);
         assertTrue(addedPostDto.getName().equals(post.getName()), "Posts names don't match");
         assertTrue(addedPostDto.getText().equals(post.getText()), "Posts texts don't match");
     }
@@ -73,7 +74,7 @@ public class PostControllerAllLayersTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        PostDto addedPostDto = postRepository.getPostById(1);
+        PostResponseDto addedPostDto = postRepository.getPostById(1);
         assertEquals(addedPostDto.getNumberOfLikes(), 1, "Post should have 1 like");
     }
 
@@ -93,7 +94,7 @@ public class PostControllerAllLayersTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        PostDto addedPostDto = postRepository.getPostById(1);
+        PostResponseDto addedPostDto = postRepository.getPostById(1);
         assertEquals(addedPostDto.getCommentsList().size(), 1, "Post should have 1 comment");
         assertEquals(addedPostDto.getCommentsList().getFirst().getText(), comment.getText(),
                 "Comment text was saved incorrectly");
@@ -101,10 +102,10 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getFeed_shouldReturnHtmlWithFeed() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2
-                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
+        PostRequestDto postDto2
+                = new PostRequestDto(2, "Post2", null, "Text2", "#Tag2");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
 
@@ -119,10 +120,10 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getFeedWithChosenTags_shouldReturnHtmlWithFeedWithChosenTags() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2
-                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
+        PostRequestDto postDto2
+                = new PostRequestDto(2, "Post2", null, "Text2", "#Tag2");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
 
@@ -138,25 +139,25 @@ public class PostControllerAllLayersTest {
 
     @Test
     void getPostById_shouldReturnPostById() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(get("/feed/post/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("post"))
-                .andExpect(model().attributeExists("postDto"));
+                .andExpect(model().attributeExists("postResponseDto"));
     }
 
     @Test
     void getFeedSplittedByPages_shouldReturnFeedSplittedBy2Pages() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        PostDto postDto2
-                = new PostDto(2, "Post2", null, "Text2", 1, "#Tag2");
-        PostDto postDto3
-                = new PostDto(3, "Post3", null, "Text3", 1, "#Tag3");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
+        PostRequestDto postDto2
+                = new PostRequestDto(2, "Post2", null, "Text2", "#Tag2");
+        PostRequestDto postDto3
+                = new PostRequestDto(3, "Post3", null, "Text3", "#Tag3");
         postRepository.addPostDto(postDto1);
         postRepository.addPostDto(postDto2);
         postRepository.addPostDto(postDto3);
@@ -173,8 +174,8 @@ public class PostControllerAllLayersTest {
 
     @Test
     void changePost_shouldChangePostAndRedirect() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(post("/feed/post/1/change")
@@ -183,15 +184,15 @@ public class PostControllerAllLayersTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        PostDto changedPostDto = postRepository.getPostById(1);
+        PostResponseDto changedPostDto = postRepository.getPostById(1);
         assertEquals(changedPostDto.getName(), "Changed Post1", "Incorrect post name");
         assertEquals(changedPostDto.getText(), "Changed Text1", "Incorrect text name");
     }
 
     @Test
     void changeComment_shouldChangeCommentAndRedirect() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         postRepository.addPostDto(postDto1);
         Comment comment = new Comment(1, 1, "new comment");
         postRepository.addComment(1, comment.getText());
@@ -203,39 +204,41 @@ public class PostControllerAllLayersTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        PostDto postDtoWithChangedComment = postRepository.getPostById(1);
+        PostResponseDto postDtoWithChangedComment = postRepository.getPostById(1);
         assertEquals(postDtoWithChangedComment.getCommentsList().getFirst().getText(),
                 "Changed comment Text1", "Comment text was changed incorrectly");
     }
 
     @Test
     void deletePost_shouldDeletePostAndRedirect() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         postRepository.addPostDto(postDto1);
 
         mockMvc.perform(post("/feed/post/1")
                         .param("_method", "delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed"));
-        List<PostDto> postDtoList = postRepository.getSortedFeed();
+        List<PostResponseDto> postDtoList = postRepository.getSortedFeed();
         assertTrue(postDtoList.isEmpty(), "Post was removedIncorrectly");
     }
 
     @Test
     void deleteComment_shouldDeleteCommentAndRedirect() throws Exception {
-        PostDto postDto1
-                = new PostDto(1, "Post1", null, "Text1", 1, "#Tag1");
+        PostRequestDto postRequestDto
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         Comment comment = new Comment(1, 1, "new comment");
-        postDto1.getCommentsList().add(comment);
-        postRepository.addPostDto(postDto1);
+        postRepository.addPostDto(postRequestDto);
+        postRepository.addComment(postRequestDto.getId(), comment.getText());
+        PostResponseDto postResponseDto = postRepository.getPostById(postRequestDto.getId());
+        assertTrue(postResponseDto.getCommentsList().size() == 1, "Incorrect number of comments");
 
         mockMvc.perform(post("/feed/post/1/removeComment/1")
                         .param("_method", "delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        PostDto postDtoWithDeletedComment = postRepository.getPostById(1);
+        PostResponseDto postDtoWithDeletedComment = postRepository.getPostById(1);
         assertTrue(postDtoWithDeletedComment.getCommentsList().isEmpty(), "Post still has comment");
     }
 }

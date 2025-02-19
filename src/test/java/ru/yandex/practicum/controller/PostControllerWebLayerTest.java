@@ -3,11 +3,11 @@ package ru.yandex.practicum.controller;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.dto.PostDto;
+import ru.yandex.practicum.dto.PostRequestDto;
+import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.service.PostService;
@@ -31,7 +31,7 @@ public class PostControllerWebLayerTest {
 
     @Test
     void addPostDto_shouldAddPostDtoToDatabaseAndRedirect() throws Exception {
-        PostDto postDto = new PostDto(1, "Post", null, "Text", 0, "Tag");
+        PostResponseDto postDto = new PostResponseDto(1, "Post", null, "Text", 0, "Tag");
         Mockito.when(postService.addPost(any(Post.class)))
                         .thenReturn(postDto);
 
@@ -48,8 +48,8 @@ public class PostControllerWebLayerTest {
 
     @Test
     void addLike_shouldAddLikeAndRedirect() throws Exception {
-        PostDto postDtoWithLike
-                = new PostDto(1, "Post", null, "Text", 1, "Tag");
+        PostResponseDto postDtoWithLike
+                = new PostResponseDto(1, "Post", null, "Text", 1, "Tag");
 
         when(postService.addLike(1))
                 .thenReturn(postDtoWithLike);
@@ -65,8 +65,8 @@ public class PostControllerWebLayerTest {
     @Test
     void addComment_shouldAddCommentAndRedirect() throws Exception {
         Comment comment = new Comment(1, 1, "new comment");
-        PostDto postDtoWithComment
-                = new PostDto(1, "Post", null, "Text", 1, "Tag");
+        PostResponseDto postDtoWithComment
+                = new PostResponseDto(1, "Post", null, "Text", 1, "Tag");
         postDtoWithComment.getCommentsList().add(comment);
 
         when(postService.addComment(anyInt(), any(Comment.class)))
@@ -84,8 +84,8 @@ public class PostControllerWebLayerTest {
     void getFeed_shouldReturnHtmlWithFeed() throws Exception {
         when(postService.getSortedFeed())
                 .thenReturn(List.of(
-                        new PostDto(1, "Post1", null, "Text1", 1, "Tag1"),
-                        new PostDto(2, "Post2", null, "Text2", 1, "Tag2")));
+                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"),
+                        new PostResponseDto(2, "Post2", null, "Text2", 1, "Tag2")));
 
         mockMvc.perform(get("/feed"))
                 .andExpect(status().isOk())
@@ -102,7 +102,7 @@ public class PostControllerWebLayerTest {
     void getFeedWithChosenTags_shouldReturnHtmlWithFeedWithChosenTags() throws Exception {
         when(postService.getFeedWithChosenTags("#Tag1"))
                 .thenReturn(List.of(
-                        new PostDto(1, "Post1", null, "Text1", 1, "#Tag1")));
+                        new PostResponseDto(1, "Post1", null, "Text1", 1, "#Tag1")));
 
         mockMvc.perform(get("/feed/tags/")
                         .param("tagsString", "#Tag1"))
@@ -120,13 +120,13 @@ public class PostControllerWebLayerTest {
     void getPostById_shouldReturnPostById() throws Exception {
         when(postService.getPostById(1))
                 .thenReturn(
-                        new PostDto(1, "Post1", null, "Text1", 1, "#Tag1"));
+                        new PostResponseDto(1, "Post1", null, "Text1", 1, "#Tag1"));
 
         mockMvc.perform(get("/feed/post/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("post"))
-                .andExpect(model().attributeExists("postDto"));
+                .andExpect(model().attributeExists("postResponseDto"));
 
         verify(postService, times(1)).getPostById(1);
     }
@@ -135,8 +135,8 @@ public class PostControllerWebLayerTest {
     void getFeedSplittedByPages_shouldReturnFeedSplittedBy2Pages() throws Exception {
         when(postService.getFeedSplittedByPages(2, 1))
                 .thenReturn(List.of(
-                        new PostDto(1, "Post1", null, "Text1", 1, "Tag1"),
-                        new PostDto(2, "Post2", null, "Text2", 1, "Tag2")));
+                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"),
+                        new PostResponseDto(2, "Post2", null, "Text2", 1, "Tag2")));
 
         mockMvc.perform(get("/feed/pages/2/1"))
                 .andExpect(status().isOk())
@@ -153,7 +153,7 @@ public class PostControllerWebLayerTest {
     void changePost_shouldChangePostAndRedirect() throws Exception {
         when(postService.changePost(any(Post.class)))
                 .thenReturn(
-                        new PostDto(1, "Changed Post1", null, "Changed Text1", 1, "Changed Tag1"));
+                        new PostResponseDto(1, "Changed Post1", null, "Changed Text1", 1, "Changed Tag1"));
         mockMvc.perform(post("/feed/post/1/change")
                         .param("name", "Changed Post1")
                         .param("text", "Changed Text1"))
@@ -165,8 +165,8 @@ public class PostControllerWebLayerTest {
 
     @Test
     void changeComment_shouldChangeCommentAndRedirect() throws Exception {
-        PostDto postDtoWithChangedComment
-                = new PostDto(1, "Post1", null, "Text1", 1, "Tag1");
+        PostResponseDto postDtoWithChangedComment
+                = new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1");
         Comment changedComment = new Comment(1, 1, "Changed comment Text1");
         postDtoWithChangedComment.getCommentsList().add(changedComment);
 
@@ -199,7 +199,7 @@ public class PostControllerWebLayerTest {
     void deleteComment_shouldDeleteCommentAndRedirect() throws Exception {
         when(postService.deleteComment(1, 1))
                 .thenReturn(
-                        new PostDto(1, "Post1", null, "Text1", 1, "Tag1"));
+                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"));
 
         mockMvc.perform(post("/feed/post/1/removeComment/1")
                         .param("_method", "delete"))

@@ -3,7 +3,8 @@ package ru.yandex.practicum.service;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.dto.PostDto;
+import ru.yandex.practicum.dto.PostRequestDto;
+import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.mapper.PostMapper;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
@@ -19,41 +20,41 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public PostDto addPost(Post post) throws IOException {
-        return postRepository.addPostDto(PostMapper.mapToPostDto(post));
+    public PostResponseDto addPost(Post post) throws IOException {
+        return postRepository.addPostDto(PostMapper.mapToPostRequestDto(post));
     }
 
-    public PostDto addLike(int id) {
+    public PostResponseDto addLike(int id) {
         return postRepository.addLike(id);
     }
 
-    public PostDto addComment(int postId, Comment comment) {
+    public PostResponseDto addComment(int postId, Comment comment) {
         return postRepository.addComment(postId, comment.getText());
     }
 
-    public List<PostDto> getSortedFeed() {
+    public List<PostResponseDto> getSortedFeed() {
         return postRepository.getSortedFeed();
     }
 
-    public List<PostDto> getFeedWithChosenTags(String tagsString) {
+    public List<PostResponseDto> getFeedWithChosenTags(String tagsString) {
         String[] tagsArray = tagsString.split(",");
         String tagsInString = mapListTextsToString(List.of(tagsArray));
         return postRepository.getFeedWithChosenTags(tagsInString);
     }
 
-    public PostDto getPostById(int id) {
+    public PostResponseDto getPostById(int id) {
         return postRepository.getPostById(id);
     }
 
-    public List<PostDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
+    public List<PostResponseDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
         return postRepository.getFeedSplittedByPages(postsOnPage, pageNumber);
     }
 
-    public PostDto changePost(Post changedPost) throws IOException {
-        return postRepository.changePost(PostMapper.mapToPostDto(changedPost));
+    public PostResponseDto changePost(Post changedPost) throws IOException {
+        return postRepository.changePost(PostMapper.mapToPostRequestDto(changedPost));
     }
 
-    public PostDto changeComment(int id, int postId, String text) {
+    public PostResponseDto changeComment(int id, int postId, String text) {
         return postRepository.changeComment(id, postId, text);
     }
 
@@ -61,7 +62,7 @@ public class PostService {
         postRepository.deletePost(id);
     }
 
-    public PostDto deleteComment(int postDtoId, int commentId) {
+    public PostResponseDto deleteComment(int postDtoId, int commentId) {
         return postRepository.deleteComment(postDtoId, commentId);
     }
 

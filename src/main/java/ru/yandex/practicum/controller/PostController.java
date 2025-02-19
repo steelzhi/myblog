@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import ru.yandex.practicum.dto.PostDto;
+import ru.yandex.practicum.dto.PostRequestDto;
+import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Pages;
 import ru.yandex.practicum.model.Post;
@@ -26,7 +27,7 @@ public class PostController {
     }
 
     @PostMapping("/post/{id}/addLike")
-    public String addLike(@PathVariable(name = "id") int id) throws IOException {
+    public String addLike(@PathVariable(name = "id") int id) {
         postService.addLike(id);
 
         return "redirect:/feed/post/" + id;
@@ -41,7 +42,7 @@ public class PostController {
 
     @GetMapping
     public String getFeed(Model model) {
-        List<PostDto> feed = postService.getSortedFeed();
+        List<PostResponseDto> feed = postService.getSortedFeed();
         model.addAttribute("feed", feed);
 
         return "feed";
@@ -49,7 +50,7 @@ public class PostController {
 
     @GetMapping("/tags/")
     public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) {
-        List<PostDto> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
+        List<PostResponseDto> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
         model.addAttribute("feed", feedWithChosenTags);
 
         return "feed";
@@ -57,8 +58,8 @@ public class PostController {
 
     @GetMapping("/post/{id}")
     public String getPostById(@PathVariable(name = "id") int id, Model model) {
-        PostDto postDto = postService.getPostById(id);
-        model.addAttribute("postDto", postDto);
+        PostResponseDto postResponseDto = postService.getPostById(id);
+        model.addAttribute("postResponseDto", postResponseDto);
 
         return "post";
     }
@@ -67,7 +68,7 @@ public class PostController {
     public String getFeedSplittedByPages(@PathVariable(name = "postsOnPage") int postsOnPage,
                                          @PathVariable(name = "pageNumber") int pageNumber,
                                          Model model) {
-        List<PostDto> feedSplittedByPages = postService.getFeedSplittedByPages(postsOnPage, pageNumber);
+        List<PostResponseDto> feedSplittedByPages = postService.getFeedSplittedByPages(postsOnPage, pageNumber);
         int feedFullSize = postService.getSortedFeed().size();
         Pages pages = new Pages(postsOnPage, (feedFullSize - 1) / postsOnPage + 1);
         model.addAttribute("feed", feedSplittedByPages);
@@ -95,7 +96,7 @@ public class PostController {
     @PostMapping(value = "/post/{id}", params = "_method=delete")
     public String deletePost(@PathVariable(name = "id") int id) {
         postService.deletePost(id);
-        List<PostDto> feed = postService.getSortedFeed();
+        List<PostResponseDto> feed = postService.getSortedFeed();
 
         return "redirect:/feed";
     }

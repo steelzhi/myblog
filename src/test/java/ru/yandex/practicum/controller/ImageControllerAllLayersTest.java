@@ -8,7 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.dto.PostDto;
+import ru.yandex.practicum.dto.PostRequestDto;
+import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.nio.file.Files;
@@ -39,16 +40,16 @@ public class ImageControllerAllLayersTest {
     @Test
     void getImage_shouldReturnImage() throws Exception {
         byte[] image = Files.readAllBytes(Paths.get("src/test/resources/image-byte-array.txt"));
-        PostDto postDto
-                = new PostDto(1, "Post1", image, "Text1", 1, "#Tag1");
+        PostRequestDto postRequestDto
+                = new PostRequestDto(1, "Post1", image, "Text1", "#Tag1");
 
-        postRepository.addPostDto(postDto);
+        postRepository.addPostDto(postRequestDto);
 
         mockMvc.perform(get("/1/image"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/octet-stream"));
 
-        PostDto postDtoFromDb = postRepository.getPostById(1);
+        PostResponseDto postDtoFromDb = postRepository.getPostById(1);
         byte[] imageFromDb = postDtoFromDb.getImage();
         assertArrayEquals(image, imageFromDb, "Image was saved or retrieved incorrectly");
     }

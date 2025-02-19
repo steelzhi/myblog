@@ -56,39 +56,39 @@
     </style>
 </head>
 <body>
-<h1 th:text="'Пост с id = ' + ${postDto.id}"></h1>
+<h1 th:text="'Пост с id = ' + ${postResponseDto.id}"></h1>
 <table>
     <tbody>
     <tr>
         <th>Название</th>
-        <td th:text="${postDto.name}"/>
+        <td th:text="${postResponseDto.name}"/>
     </tr>
     <tr>
         <th>Картинка</th>
-        <td><img th:src="@{/{postDtoId}/image(postDtoId=${postDto.id})}" width="400"/></td>
+        <td><img th:src="@{/{postResponseDtoId}/image(postResponseDtoId=${postResponseDto.id})}" width="400"/></td>
     </tr>
     <tr>
         <th>Текст</th>
-        <td th:text="${postDto.text}"/>
+        <td th:text="${postResponseDto.text}"/>
     </tr>
     <tr>
         <th>Теги</th>
-        <td th:text="${postDto.tagsTextList}"/>
+        <td th:text="${postResponseDto.tagsTextList}"/>
     </tr>
     <tr>
         <th>Количество комментариев</th>
-        <td th:text="${#lists.size(postDto.commentsList)}"/>
+        <td th:text="${#lists.size(postResponseDto.commentsList)}"/>
     </tr>
-    <tr th:each="comment : ${postDto.commentsList}">
+    <tr th:each="comment : ${postResponseDto.commentsList}">
         <th>Комментарий</th>
         <td id="cellToObserve"
             contenteditable=true
             th:text="${comment.text}"
-            th:attr="post-id=${postDto.id},comment-id=${comment.id}"
+            th:attr="post-id=${postResponseDto.id},comment-id=${comment.id}"
             onkeydown="toggleForm3(event)">
         </td>
         <td>
-            <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postDto.id}, commentId=${comment.id})}"
+            <form th:action="@{/feed/post/{id}/removeComment/{commentId}(id=${postResponseDto.id}, commentId=${comment.id})}"
                   method="post" style="display:inline;">
                 <input type="hidden" name="_method" value="delete"/>
                 <button type="submit">Удалить комментарий</button>
@@ -97,12 +97,12 @@
     </tr>
     <tr>
         <th>Количество лайков</th>
-        <td th:text="${postDto.numberOfLikes}"/>
+        <td th:text="${postResponseDto.numberOfLikes}"/>
     </tr>
     </tbody>
 </table>
 
-<form th:action="@{/feed/post/{id}/addLike(id=${postDto.id})}" method="POST">
+<form th:action="@{/feed/post/{id}/addLike(id=${postResponseDto.id})}" method="POST">
     <input type="hidden"/>
     <button type="submit">Поставить лайк</button>
 </form>
@@ -111,7 +111,7 @@
 <button class="btn-add" onclick="toggleForm2()">Добавить комментарий</button>
 <div class="form-container" style="display: none;" id="addComment">
     <h2>Добавить комментарий</h2>
-    <form th:action="@{/feed/post/{id}/addComment(id=${postDto.id})}" method="POST"
+    <form th:action="@{/feed/post/{id}/addComment(id=${postResponseDto.id})}" method="POST"
           th:object="${comment}">
         <input type="hidden"/>
         <label for="text">Текст:</label>
@@ -124,7 +124,7 @@
 <button class="btn-add" onclick="toggleForm()">Редактировать пост</button>
 <div class="form-container" style="display: none;" id="changeForm">
     <h2>Редактировать пост</h2>
-    <form th:action="@{/feed/post/{id}/change(id=${postDto.id})}" method="POST" th:object="${post}"
+    <form th:action="@{/feed/post/{id}/change(id=${postResponseDto.id})}" method="POST" th:object="${post}"
           enctype="multipart/form-data">
         <label for="name">Название:</label>
         <input type="text" id="name" name="name" required="required"/>
@@ -139,7 +139,7 @@
 </div>
 <br/>
 
-<form th:action="@{/feed/post/{id}(id=${postDto.id})}" method="post" style="display:inline;">
+<form th:action="@{/feed/post/{id}(id=${postResponseDto.id})}" method="post" style="display:inline;">
     <input type="hidden" name="_method" value="delete"/>
     <button type="submit">Удалить пост</button>
 </form>
