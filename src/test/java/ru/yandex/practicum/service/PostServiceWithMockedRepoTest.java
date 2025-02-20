@@ -16,6 +16,7 @@ import ru.yandex.practicum.repository.PostRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,7 +108,7 @@ public class PostServiceWithMockedRepoTest {
     }
 
     @Test
-    void testGetFeedWithChosenTags() {
+    void testGetFeedWithChosenTags() throws SQLException {
         String tagString1 = "#Tag1";
         String tagString2 = "#Tag2";
         PostResponseDto mockPostDto1WithId

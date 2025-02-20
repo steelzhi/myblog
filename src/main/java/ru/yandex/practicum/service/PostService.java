@@ -11,6 +11,7 @@ import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -36,7 +37,7 @@ public class PostService {
         return postRepository.getSortedFeed();
     }
 
-    public List<PostResponseDto> getFeedWithChosenTags(String tagsString) {
+    public List<PostResponseDto> getFeedWithChosenTags(String tagsString) throws SQLException {
         String[] tagsArray = tagsString.split(",");
         String tagsInString = mapListTextsToString(List.of(tagsArray));
         return postRepository.getFeedWithChosenTags(tagsInString);

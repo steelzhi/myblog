@@ -3,6 +3,7 @@ package ru.yandex.practicum.repository;
 import ru.yandex.practicum.dto.PostRequestDto;
 import ru.yandex.practicum.dto.PostResponseDto;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface PostRepository {
@@ -14,7 +15,7 @@ public interface PostRepository {
 
     List<PostResponseDto> getSortedFeed();
 
-    List<PostResponseDto> getFeedWithChosenTags(String tagsString);
+    List<PostResponseDto> getFeedWithChosenTags(String tagsString) throws SQLException;
 
     PostResponseDto getPostById(int id);
 

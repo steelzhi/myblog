@@ -1,17 +1,19 @@
 package ru.yandex.practicum.repository;
 
 import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.relational.core.sql.In;
+import org.springframework.jdbc.core.*;
+import org.thymeleaf.util.StringUtils;
 import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.dto.PostRequestDto;
 import ru.yandex.practicum.model.PostTag;
 import ru.yandex.practicum.model.Tag;
 
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,23 +57,22 @@ public class JdbcBlogRepository implements PostRepository {
             resultSet.getInt("tag_id"));
 
     @Autowired
-    private final JdbcTemplate jdbcTemplate;
-
-    public JdbcBlogRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public PostResponseDto addPostDto(PostRequestDto postRequestDto) {
-        jdbcTemplate.update("INSERT INTO posts (name, image, text) VALUES (?, ?, ?)",
+        jdbcTemplate.update("""
+                        INSERT INTO posts (name, image, text) 
+                        VALUES (?, ?, ?)
+                        """,
                 postRequestDto.getName(), postRequestDto.getImage(), postRequestDto.getText());
 
-        int postId = jdbcTemplate.query("""
+        int postId = jdbcTemplate.queryForObject("""
                 SELECT id
                 FROM posts
                 ORDER BY id DESC
                 LIMIT(1);
-                """, MAP_TO_ID).get(0);
+                """, Integer.class);
 
         PostResponseDto postResponseDto = getPostById(postId);
         postResponseDto.getTagsTextList().addAll(postRequestDto.getTagsTextList());
@@ -82,8 +83,7 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostResponseDto addLike(int postId) {
-        jdbcTemplate.update(
-                """
+        jdbcTemplate.update("""
                         UPDATE posts 
                         SET number_of_likes = number_of_likes + 1
                         WHERE id = ?
@@ -96,47 +96,73 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostResponseDto addComment(int postId, String commentText) {
-        jdbcTemplate.update("INSERT INTO comments (post_id, text) VALUES (?, ?)", postId, commentText);
+        jdbcTemplate.update("""
+                INSERT INTO comments (post_id, text) 
+                VALUES (?, ?)
+                """, postId, commentText);
 
         return getPostById(postId);
     }
 
     @Override
     public List<PostResponseDto> getSortedFeed() {
-        List<PostResponseDto> postDtosList = jdbcTemplate.query(
-                """
-                        SELECT id, name, image, text, number_of_likes 
-                        FROM posts p
-                        """, MAP_TO_POSTRESPONSEDTO);
+        List<PostResponseDto> postDtosList = jdbcTemplate.query("""
+                SELECT id, name, image, text, number_of_likes 
+                FROM posts p
+                """, MAP_TO_POSTRESPONSEDTO);
         return getPostResponseDtoListWithCommentsAndTags(postDtosList);
     }
 
     @Override
     public List<PostResponseDto> getFeedWithChosenTags(String tagsInString) {
-        List<Integer> postDtosIdsWithTags = jdbcTemplate.query(
-                "SELECT post_id FROM posts_tags pt LEFT JOIN tags t ON t.id = pt.tag_id WHERE t.text IN "
-                        + tagsInString + " ORDER BY post_id DESC", MAP_TO_POST_ID
-        );
+        PreparedStatementCreator psc = con -> {
+            String[] tagArray = tagsInString.substring(2, tagsInString.length() - 2).split("','");
+            StringBuilder sb = getStringWithPlaceHolders(tagArray.length);
+            PreparedStatement selectPosts = con.prepareStatement(
+                    "SELECT post_id FROM posts_tags pt LEFT JOIN tags t ON t.id = pt.tag_id WHERE t.text IN ("
+                            + sb + ") ORDER BY post_id DESC ");
+            for (int i = 0; i < tagArray.length; i++) {
+                selectPosts.setString(i + 1, tagArray[i]);
+            }
+
+            return selectPosts;
+        };
+
+        List<Integer> postDtosIdsWithTags = jdbcTemplate.query(psc, MAP_TO_POST_ID);
 
         if (postDtosIdsWithTags.isEmpty()) {
             return new ArrayList<>();
         }
 
-        String postDtosIdsInString = mapListIdsToString(postDtosIdsWithTags);
-        List<PostResponseDto> selectedPostDtosList = jdbcTemplate.query(
-                """
-                        SELECT id, name, image, text, number_of_likes 
-                        FROM posts
-                        WHERE id IN 
-                        """ + postDtosIdsInString, MAP_TO_POSTRESPONSEDTO
-        );
+        psc = con -> {
+            StringBuilder sb = getStringWithPlaceHolders(postDtosIdsWithTags.size());
+            PreparedStatement selectPosts = con.prepareStatement(
+                    "SELECT id, name, image, text, number_of_likes FROM posts WHERE id IN (" + sb + ")");
+            for (int i = 0; i < postDtosIdsWithTags.size(); i++) {
+                selectPosts.setInt(i + 1, postDtosIdsWithTags.get(i));
+            }
+
+            return selectPosts;
+        };
+
+        List<PostResponseDto> selectedPostDtosList = jdbcTemplate.query(psc, MAP_TO_POSTRESPONSEDTO);
         return getPostResponseDtoListWithCommentsAndTags(selectedPostDtosList);
     }
 
     @Override
     public PostResponseDto getPostById(int id) {
-        String query = "SELECT id, name, image, text, number_of_likes FROM posts WHERE id = " + id + ";";
-        PostResponseDto postResponseDto = jdbcTemplate.query(query, MAP_TO_POSTRESPONSEDTO).getFirst();
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement selectPost = con.prepareStatement("""
+                    SELECT id, name, image, text, number_of_likes 
+                    FROM posts 
+                    WHERE id = ?
+                    """);
+            selectPost.setInt(1, id);
+
+            return selectPost;
+        };
+
+        PostResponseDto postResponseDto = jdbcTemplate.query(psc, MAP_TO_POSTRESPONSEDTO).getFirst();
         List<Comment> commentList = getAllCommentsForPost(postResponseDto.getId());
         postResponseDto.getCommentsList().addAll(commentList);
         List<String> tagsTextList = getAllTagsTextForPost(postResponseDto.getId());
@@ -146,10 +172,21 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public List<PostResponseDto> getFeedSplittedByPages(int postsOnPage, int pageNumber) {
-        List<PostResponseDto> postResponseDtos = jdbcTemplate.query(
-                "SELECT id, name, image, text, number_of_likes FROM posts p ORDER BY id DESC LIMIT "
-                        + postsOnPage + " OFFSET " + postsOnPage * (pageNumber - 1),
-                MAP_TO_POSTRESPONSEDTO);
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement selectPost = con.prepareStatement("""
+                    SELECT id, name, image, text, number_of_likes 
+                    FROM posts p 
+                    ORDER BY id DESC 
+                    LIMIT ? 
+                    OFFSET ?
+                    """);
+            selectPost.setInt(1, postsOnPage);
+            selectPost.setInt(2, postsOnPage * (pageNumber - 1));
+
+            return selectPost;
+        };
+
+        List<PostResponseDto> postResponseDtos = jdbcTemplate.query(psc, MAP_TO_POSTRESPONSEDTO);
         return getPostResponseDtoListWithCommentsAndTags(postResponseDtos);
     }
 
@@ -179,13 +216,21 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public PostResponseDto changeComment(int id, int postId, String text) {
-        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ? AND post_id = ?", text, id, postId);
+        jdbcTemplate.update("""
+                UPDATE comments 
+                SET text = ? 
+                WHERE id = ? 
+                    AND post_id = ?
+                """, text, id, postId);
         return getPostById(postId);
     }
 
     @Override
     public void deletePost(int id) {
-        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        jdbcTemplate.update("""
+                DELETE FROM posts 
+                WHERE id = ?
+                """, id);
     }
 
     private List<String> getAllTagsTextForPost(int postId) {
@@ -194,12 +239,20 @@ public class JdbcBlogRepository implements PostRepository {
         if (postsTagsList != null && !postsTagsList.isEmpty()) {
             List<Integer> tagsIdsForPostDto = getTagsIdsForPostDto(postId);
             if (tagsIdsForPostDto != null && !tagsIdsForPostDto.isEmpty()) {
-                String tagsIdsInStringWithBrackets = mapListIdsToString(tagsIdsForPostDto);
-                tagsTextList = jdbcTemplate.query("""
-                        SELECT text
-                        FROM tags
-                        WHERE id IN 
-                        """ + tagsIdsInStringWithBrackets, MAP_TO_TEXT);
+
+                PreparedStatementCreator psc = con -> {
+                    StringBuilder sb = getStringWithPlaceHolders(tagsIdsForPostDto.size());
+                    PreparedStatement selectTagsText = con.prepareStatement(
+                            "SELECT text FROM tags WHERE id IN (" + sb + ")");
+
+                    for (int i = 0; i < tagsIdsForPostDto.size(); i++) {
+                        selectTagsText.setInt(i + 1, tagsIdsForPostDto.get(i));
+                    }
+
+                    return selectTagsText;
+                };
+
+                tagsTextList = jdbcTemplate.query(psc, MAP_TO_TEXT);
             }
         }
 
@@ -217,7 +270,18 @@ public class JdbcBlogRepository implements PostRepository {
 
     @Override
     public byte[] getImage(int postDtoId) {
-        byte[] image = jdbcTemplate.query("SELECT image FROM posts WHERE id = " + postDtoId, MAP_TO_IMAGE).getFirst();
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement selectPost = con.prepareStatement("""
+                    SELECT image 
+                    FROM posts 
+                    WHERE id = ?
+                    """);
+            selectPost.setInt(1, postDtoId);
+
+            return selectPost;
+        };
+
+        byte[] image = jdbcTemplate.query(psc, MAP_TO_IMAGE).getFirst();
         return image;
     }
 
@@ -250,11 +314,19 @@ public class JdbcBlogRepository implements PostRepository {
     }
 
     private List<Integer> getTagsIdsForPostDto(int postDtoId) {
-        return jdbcTemplate.query("""
-                SELECT tag_id
-                FROM posts_tags
-                WHERE post_id = 
-                """ + postDtoId, MAP_TO_TAG_ID);
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement selectPost = con.prepareStatement(
+                    """
+                            SELECT tag_id
+                            FROM posts_tags
+                            WHERE post_id = ?
+                            """);
+            selectPost.setInt(1, postDtoId);
+
+            return selectPost;
+        };
+
+        return jdbcTemplate.query(psc, MAP_TO_TAG_ID);
     }
 
     private void addNewTags(PostResponseDto postResponseDto) {
@@ -275,8 +347,18 @@ public class JdbcBlogRepository implements PostRepository {
                         LIMIT(1);
                         """, MAP_TO_ID).getFirst();
             } else {
-                tagId = jdbcTemplate.query("SELECT id FROM tags WHERE text = '" + tagText + "'",
-                        MAP_TO_ID).getFirst();
+                PreparedStatementCreator psc = con -> {
+                    PreparedStatement selectPost = con.prepareStatement("""
+                            SELECT id 
+                            FROM tags 
+                            WHERE text = ?
+                            """);
+                    selectPost.setString(1, tagText);
+
+                    return selectPost;
+                };
+
+                tagId = jdbcTemplate.query(psc, MAP_TO_ID).getFirst();
             }
 
             jdbcTemplate.update("""
@@ -304,13 +386,20 @@ public class JdbcBlogRepository implements PostRepository {
         return comments;
     }
 
-    private List<Comment> getAllCommentsForPost(long postId) {
-        List<Comment> commentList = jdbcTemplate.query(
-                """
-                        SELECT id, text, post_id
-                        FROM comments
-                        WHERE post_id = 
-                        """ + postId, MAP_TO_COMMENTS);
+    private List<Comment> getAllCommentsForPost(int postId) {
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement selectPost = con.prepareStatement(
+                    """
+                            SELECT id, text, post_id
+                            FROM comments
+                            WHERE post_id = ?
+                            """);
+            selectPost.setInt(1, postId);
+
+            return selectPost;
+        };
+
+        List<Comment> commentList = jdbcTemplate.query(psc, MAP_TO_COMMENTS);
 
         return commentList;
     }
@@ -334,17 +423,6 @@ public class JdbcBlogRepository implements PostRepository {
         }
     }
 
-    private String mapListIdsToString(List<Integer> idsList) {
-        StringBuilder sb = new StringBuilder("('");
-        for (Integer id : idsList) {
-            sb.append(id).append("','");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        sb.append(")");
-        return sb.toString();
-    }
-
-
     private List<PostResponseDto> getPostResponseDtoListWithCommentsAndTags(List<PostResponseDto> postResponseDtos) {
         Map<Integer, PostResponseDto> postDtosMap = postResponseDtos.stream()
                 .collect(Collectors.toMap(PostResponseDto::getId, postResponseDto -> postResponseDto));
@@ -358,5 +436,14 @@ public class JdbcBlogRepository implements PostRepository {
 
     private Comparator<PostResponseDto> getComparatorForId() {
         return (p1, p2) -> p2.getId() - p1.getId();
+    }
+
+    private StringBuilder getStringWithPlaceHolders(int numberOfPlaceHolders) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < numberOfPlaceHolders; i++) {
+            sb.append("?,");
+        }
+        sb.delete(sb.length() - 1, sb.length());
+        return sb;
     }
 }

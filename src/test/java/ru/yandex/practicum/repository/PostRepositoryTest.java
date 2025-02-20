@@ -14,6 +14,7 @@ import ru.yandex.practicum.model.Comment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,7 +96,7 @@ public class PostRepositoryTest {
     }
 
     @Test
-    void getFeedWithChosenTags_shouldReturnFeedWithChosenTags() {
+    void getFeedWithChosenTags_shouldReturnFeedWithChosenTags() throws SQLException {
         String tagString1 = "('#Tag1')";
         String tagString2 = "('#CommonTag','#Tag2')";
         List<PostResponseDto> feedWithChosenTag1 = postRepository.getFeedWithChosenTags(tagString1);

@@ -12,6 +12,7 @@ import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.service.PostService;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @Controller
@@ -49,7 +50,7 @@ public class PostController {
     }
 
     @GetMapping("/tags/")
-    public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) {
+    public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) throws SQLException {
         List<PostResponseDto> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
         model.addAttribute("feed", feedWithChosenTags);
 
