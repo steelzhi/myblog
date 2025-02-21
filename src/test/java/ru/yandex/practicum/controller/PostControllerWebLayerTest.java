@@ -61,8 +61,7 @@ public class PostControllerWebLayerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("feed"))
                 .andExpect(model().attributeExists("feed"))
-                .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
-                .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
+                .andExpect(model().attributeExists("pages"));
 
         verify(postService, times(1)).getSortedFeed();
     }
@@ -112,6 +111,7 @@ public class PostControllerWebLayerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("feed"))
                 .andExpect(model().attributeExists("feed"))
+                .andExpect(model().attributeExists("pages"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
 

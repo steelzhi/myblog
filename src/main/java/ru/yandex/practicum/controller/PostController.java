@@ -18,6 +18,9 @@ import java.util.List;
 @Controller
 @RequestMapping("/feed")
 public class PostController {
+    public static final int POSTS_ON_PAGE_DEFAULT = 10;
+    public static final int PAGE_NUMBER_FIRST = 1;
+
     @Autowired
     private PostService postService;
 
@@ -29,8 +32,11 @@ public class PostController {
 
     @GetMapping
     public String getFeed(Model model) {
-        List<PostResponseDto> feed = postService.getSortedFeed();
-        model.addAttribute("feed", feed);
+        List<PostResponseDto> feedSplittedWith10PostsOnPage = postService.getFeedSplittedByPages(POSTS_ON_PAGE_DEFAULT, PAGE_NUMBER_FIRST);
+        int feedFullSize = postService.getSortedFeed().size();
+        Pages pages = new Pages(POSTS_ON_PAGE_DEFAULT, (feedFullSize - 1) / POSTS_ON_PAGE_DEFAULT + 1);
+        model.addAttribute("feed", feedSplittedWith10PostsOnPage);
+        model.addAttribute("pages", pages);
 
         return "feed";
     }
