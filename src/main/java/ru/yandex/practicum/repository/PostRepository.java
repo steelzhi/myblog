@@ -22,4 +22,6 @@ public interface PostRepository {
     void deletePost(int id);
 
     void cleanAllPosts();
+
+    void cleanTagsMap();
 }

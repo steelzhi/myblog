@@ -39,13 +39,12 @@ public class PostControllerAllLayersTest {
     public void setUp() {
         // Очистка базы данных перед каждым тестом
         postRepository.cleanAllPosts();
+        postRepository.cleanTagsMap();
     }
 
     @Test
     void addPostDto_shouldAddPostDtoToDatabaseAndRedirect() throws Exception {
         Post post = new Post(0, "Post", null, "Text", "Tag");
-        /*PostDto postDto = PostMapper.mapToPostDto(post);
-        postRepository.addPostDto(postDto);*/
 
         mockMvc.perform(post("/feed")
                         .param("id", String.valueOf(post.getId()))

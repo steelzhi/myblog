@@ -51,6 +51,13 @@ public class JdbcPostRepository implements PostRepository {
             resultSet.getInt("post_id"),
             resultSet.getInt("tag_id"));
 
+    /*
+     * Если в этой мапе поменять местами ключ и значение, это усложнит метод addTagsToPostDtos,
+     * который использует ключ из этой мапы для поиска в таблице связей
+     */
+    private Map<Integer, String> tagsMap = new HashMap<>();
+    private boolean wereTagsUpdated;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -71,7 +78,6 @@ public class JdbcPostRepository implements PostRepository {
 
         PostResponseDto postResponseDto = getPostById(postId);
         postResponseDto.getTagsTextList().addAll(postRequestDto.getTagsTextList());
-        postRequestDto.setId(postId);
         addNewTags(postResponseDto);
         return postResponseDto;
     }
@@ -269,10 +275,14 @@ public class JdbcPostRepository implements PostRepository {
     }
 
     private void addNewTags(PostResponseDto postResponseDto) {
-        Map<Integer, String> tagMap = getTagsMap();
+        if (wereTagsUpdated) {
+            tagsMap = getTagsMap();
+            wereTagsUpdated = false;
+        }
+
         for (String tagText : postResponseDto.getTagsTextList()) {
             int tagId;
-            if (!tagMap.containsValue(tagText)) {
+            if (!tagsMap.containsValue(tagText)) {
                 jdbcTemplate.update("""
                                 INSERT INTO tags (text)
                                 VALUES (?);
@@ -285,16 +295,17 @@ public class JdbcPostRepository implements PostRepository {
                         ORDER BY id DESC
                         LIMIT(1);
                         """, MAP_TO_ID).getFirst();
+                wereTagsUpdated = true;
             } else {
                 PreparedStatementCreator psc = con -> {
-                    PreparedStatement selectPost = con.prepareStatement("""
+                    PreparedStatement selectId = con.prepareStatement("""
                             SELECT id 
                             FROM tags 
                             WHERE text = ?
                             """);
-                    selectPost.setString(1, tagText);
+                    selectId.setString(1, tagText);
 
-                    return selectPost;
+                    return selectId;
                 };
 
                 tagId = jdbcTemplate.query(psc, MAP_TO_ID).getFirst();
@@ -344,7 +355,10 @@ public class JdbcPostRepository implements PostRepository {
     }
 
     private void addTagsToPostDtos(Map<Integer, PostResponseDto> postDtosMap) {
-        Map<Integer, String> tagsMap = getTagsMap();
+        if (wereTagsUpdated) {
+            tagsMap = getTagsMap();
+            wereTagsUpdated = false;
+        }
         List<PostTag> postsTagsList = getPostsTagsList();
         for (PostTag pt : postsTagsList) {
             if (postDtosMap.containsKey(pt.getPostId())) {
@@ -384,5 +398,11 @@ public class JdbcPostRepository implements PostRepository {
         }
         sb.delete(sb.length() - 1, sb.length());
         return sb;
+    }
+
+    // Метод ниже нужен для тестирования контроллера - чтобы на каждом тесте зачищались данные из оперативной памяти
+    public void cleanTagsMap() {
+        tagsMap.clear();
+        wereTagsUpdated = false;
     }
 }
