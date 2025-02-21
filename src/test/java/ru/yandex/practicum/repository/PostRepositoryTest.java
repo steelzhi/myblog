@@ -65,29 +65,6 @@ public class PostRepositoryTest {
     }
 
     @Test
-    void addLike_shouldAddLikeToPostDto() throws Exception {
-        PostResponseDto postDto1 = postRepository.getPostById(1);
-        int currentLikes = postDto1.getNumberOfLikes();
-        postRepository.addLike(1);
-        PostResponseDto postDto1WithLike = postRepository.getPostById(1);
-        int incrementedLikes = postDto1WithLike.getNumberOfLikes();
-        assertEquals(incrementedLikes, currentLikes + 1, "Number of likes was changed incorrectly");
-    }
-
-    @Test
-    void addComment_shouldAddCommentToPostDto() throws Exception {
-        Comment comment = new Comment(1, 1, "Comment to Post1");
-        PostResponseDto postDto1 = postRepository.getPostById(1);
-        assertTrue(postDto1.getCommentsList().isEmpty(), "Comments list must be empty");
-        postRepository.addComment(postDto1.getId(), comment.getText());
-        PostResponseDto postDto1WithComment = postRepository.getPostById(1);
-        assertEquals(postDto1WithComment.getCommentsList().size(), 1,
-                "Comments list must contain 1 comment");
-        assertEquals(postDto1WithComment.getCommentsList().get(0).getText(), comment.getText(),
-                "Comment text was added incorrectly");
-    }
-
-    @Test
     void getSortedFeed_shouldReturnSortedFeed() {
         List<PostResponseDto> feed = postRepository.getSortedFeed();
         assertEquals(feed.size(), 3, "Feed should contain 3 posts");
@@ -150,48 +127,11 @@ public class PostRepositoryTest {
     }
 
     @Test
-    void changeComment_shouldChangeComment() {
-        PostResponseDto postDto2 = postRepository.getPostById(2);
-        Comment comment = postDto2.getCommentsList().getFirst();
-        //comment.setText("Changed comment text");
-        String changedText = "Changed comment text";
-        PostResponseDto postDto2WithChangedComment
-                = postRepository.changeComment(comment.getId(), postDto2.getId(), changedText);
-        assertTrue(postDto2WithChangedComment != null,
-                "After changing comment post doesn't exist anymore");
-        assertEquals(postDto2WithChangedComment.getCommentsList().get(0).getText(), changedText,
-                "Text was changed incorrectly");
-    }
-
-    @Test
     void deletePost_shouldDeletePost() {
         PostResponseDto postDto1 = postRepository.getPostById(1);
         postRepository.deletePost(postDto1.getId());
         List<PostResponseDto> feedWithoutPost1 = postRepository.getSortedFeed();
         assertFalse(feedWithoutPost1.contains(postDto1), "Feed shouldn't contain post 1");
         assertTrue(feedWithoutPost1.size() == 2, "Feed should contain only 2 posts");
-    }
-
-    @Test
-    void deleteComment_shouldDeleteComment() {
-        PostResponseDto postDto1 = postRepository.getPostById(1);
-        Comment comment = new Comment(1, 1, "Comment to Post1");
-        postDto1.getCommentsList().add(comment);
-        assertTrue(postDto1.getCommentsList().contains(comment));
-        PostResponseDto postDto1WithoutComment = postRepository.deleteComment(postDto1.getId(), comment.getId());
-        assertFalse(postDto1WithoutComment.getCommentsList().contains(comment),
-                "Post 1 comments list shouldn't contain comment 1");
-        assertTrue(postDto1WithoutComment.getCommentsList().isEmpty(), "Post 1 comments list should be empty");
-    }
-
-    @Test
-    void getImage_shouldReturnImage() throws IOException {
-        byte[] image = Files.readAllBytes(Paths.get("src/test/resources/image-byte-array.txt"));
-        jdbcTemplate.execute("UPDATE posts SET image = '" + image + "' WHERE id = 1");
-
-        byte[] imageFromDb = postRepository.getImage(1);
-
-        assertTrue(imageFromDb != null, "Post 1 should exist");
-        assertArrayEquals(imageFromDb, imageFromDb, "Image was saved or retrieved incorrectly");
     }
 }

@@ -11,6 +11,9 @@ import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.mapper.PostMapper;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
+import ru.yandex.practicum.repository.CommentRepository;
+import ru.yandex.practicum.repository.ImageRepository;
+import ru.yandex.practicum.repository.LikeRepository;
 import ru.yandex.practicum.repository.PostRepository;
 
 import java.io.IOException;
@@ -28,9 +31,6 @@ public class PostServiceWithMockedRepoTest {
     PostRequestDto mockPostDto1WithoutId = PostMapper.mapToPostRequestDto(post);
     PostResponseDto mockPostDto1WithId
             = new PostResponseDto(1, "Post1", null, "Text1", 0, "#Tag1");
-
-    PostResponseDto mockPostDto2
-            = new PostResponseDto(2, "Post2", null, "Text2", 0, "#Tag2");
 
     @Autowired
     PostService postService;
@@ -56,37 +56,6 @@ public class PostServiceWithMockedRepoTest {
         assertTrue(addedPostDto.getId() == 1, "Id is incorrect");
 
         Mockito.verify(postRepository, times(1)).addPostDto(mockPostDto1WithoutId);
-    }
-
-    @Test
-    void testAddLike() {
-        PostResponseDto mockPostDto1WithLike
-                = new PostResponseDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        Mockito.when(postRepository.addLike(mockPostDto1WithLike.getId()))
-                .thenReturn(mockPostDto1WithLike);
-
-        PostResponseDto postDtoWithLike = postService.addLike(mockPostDto1WithLike.getId());
-        assertTrue(postDtoWithLike != null, "Post wasn't added");
-        assertTrue(postDtoWithLike.getNumberOfLikes() == 1, "Like wasn't added to post");
-
-        Mockito.verify(postRepository, times(1)).addLike(mockPostDto1WithLike.getId());
-    }
-
-    @Test
-    void testAddComment() {
-        PostResponseDto mockPostDtoWithComment
-                = new PostResponseDto(1, "Post1", null, "Text1", 1, "#Tag1");
-        Comment comment = new Comment(0, 1, "Comment");
-        mockPostDtoWithComment.getCommentsList().add(comment);
-        Mockito.when(postRepository.addComment(mockPostDtoWithComment.getId(), comment.getText()))
-                .thenReturn(mockPostDtoWithComment);
-
-        PostResponseDto postDtoWithComment = postService.addComment(1, comment);
-        assertTrue(postDtoWithComment != null, "Post wasn't added");
-        assertTrue(postDtoWithComment.getCommentsList().contains(comment), "Comment comment);\n" +
-                "        assertTrue(postDtoWithComment != null, \"Post wasn't added");
-
-        Mockito.verify(postRepository, times(1)).addComment(1, comment.getText());
     }
 
     @Test
@@ -193,62 +162,8 @@ public class PostServiceWithMockedRepoTest {
     }
 
     @Test
-
-    void changeComment() {
-        PostResponseDto mockPostDto
-                = new PostResponseDto(10, "Post 10", null, "Text 10", 0, "Tag10");
-        Comment comment = new Comment(10, mockPostDto.getId(), "Comment 10");
-        mockPostDto.getCommentsList().add(comment);
-        String changedText = "Changed text 10";
-        mockPostDto.getCommentsList().get(0).setText(changedText);
-
-        Mockito.when(postRepository.changeComment(mockPostDto.getId(), comment.getId(), changedText))
-                .thenReturn(mockPostDto);
-        PostResponseDto postDtoWithChangedComment
-                = postService.changeComment(mockPostDto.getId(), comment.getId(), changedText);
-        assertTrue(postDtoWithChangedComment != null, "Feed doesn't contain post");
-        assertEquals(postDtoWithChangedComment, mockPostDto, "Post wasn't changed or was changed incorrectly");
-
-        Mockito.verify(postRepository, times(1))
-                .changeComment(mockPostDto.getId(), comment.getId(), changedText);
-    }
-
-
-    @Test
     void testDeletePost() {
         postService.deletePost(1);
         Mockito.verify(postRepository, times(1)).deletePost(1);
-    }
-
-    @Test
-    void testDeleteComment() {
-        PostResponseDto mockPostDtoWithComment
-                = new PostResponseDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        Comment comment = new Comment(1, 1, "Comment");
-        mockPostDtoWithComment.getCommentsList().add(comment);
-        PostResponseDto mockPostDtoWithoutComment
-                = new PostResponseDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        Mockito.when(postRepository.deleteComment(mockPostDtoWithoutComment.getId(), comment.getId()))
-                .thenReturn(mockPostDtoWithoutComment);
-
-        PostResponseDto postDtoWithoutComment = postService.deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
-        assertTrue(postDtoWithoutComment != null, "Post should exist after comment deleting");
-        assertTrue(postDtoWithoutComment.getCommentsList().isEmpty(), "Comments list should be empty");
-
-        Mockito.verify(postRepository, times(1))
-                .deleteComment(mockPostDtoWithoutComment.getId(), comment.getId());
-    }
-
-    @Test
-    void testGetImage() throws IOException {
-        byte[] image = Files.readAllBytes(Paths.get("src/test/resources/image-byte-array.txt"));
-        Mockito.when(postRepository.getImage(1))
-                .thenReturn(image);
-
-        byte[] imageFromDb = postService.getImage(1);
-        assertNotNull(imageFromDb, "Post should exist");
-        assertArrayEquals(imageFromDb, imageFromDb, "Image was saved or retrieved incorrectly");
-
-        Mockito.verify(postRepository, times(1)).getImage(1);
     }
 }

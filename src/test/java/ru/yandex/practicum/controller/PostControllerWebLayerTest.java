@@ -10,6 +10,9 @@ import ru.yandex.practicum.dto.PostRequestDto;
 import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
+import ru.yandex.practicum.service.CommentService;
+import ru.yandex.practicum.service.ImageService;
+import ru.yandex.practicum.service.LikeService;
 import ru.yandex.practicum.service.PostService;
 
 import java.util.List;
@@ -20,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest(PostController.class)
 public class PostControllerWebLayerTest {
 
     @Autowired
@@ -44,40 +47,6 @@ public class PostControllerWebLayerTest {
                 .andExpect(redirectedUrl("/feed"));
 
         verify(postService, times(1)).addPost(any(Post.class));
-    }
-
-    @Test
-    void addLike_shouldAddLikeAndRedirect() throws Exception {
-        PostResponseDto postDtoWithLike
-                = new PostResponseDto(1, "Post", null, "Text", 1, "Tag");
-
-        when(postService.addLike(1))
-                .thenReturn(postDtoWithLike);
-
-        mockMvc.perform(post("/feed/post/1/addLike"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/feed/post/1"));
-
-        verify(postService, times(1)).addLike(1);
-
-    }
-
-    @Test
-    void addComment_shouldAddCommentAndRedirect() throws Exception {
-        Comment comment = new Comment(1, 1, "new comment");
-        PostResponseDto postDtoWithComment
-                = new PostResponseDto(1, "Post", null, "Text", 1, "Tag");
-        postDtoWithComment.getCommentsList().add(comment);
-
-        when(postService.addComment(anyInt(), any(Comment.class)))
-                .thenReturn(postDtoWithComment);
-
-        mockMvc.perform(post("/feed/post/1/addComment")
-                .param("text", "new comment"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/feed/post/1"));
-
-        verify(postService, times(1)).addComment(anyInt(), any(Comment.class));
     }
 
     @Test
@@ -164,26 +133,6 @@ public class PostControllerWebLayerTest {
     }
 
     @Test
-    void changeComment_shouldChangeCommentAndRedirect() throws Exception {
-        PostResponseDto postDtoWithChangedComment
-                = new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1");
-        Comment changedComment = new Comment(1, 1, "Changed comment Text1");
-        postDtoWithChangedComment.getCommentsList().add(changedComment);
-
-        when(postService.changeComment(1, 1, "Changed comment Text1"))
-                .thenReturn(postDtoWithChangedComment);
-
-        mockMvc.perform(post("/feed/post/comment")
-                        .param("id", "1")
-                        .param("postId", "1")
-                        .param("text", "Changed comment Text1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/feed/post/1"));
-
-        verify(postService, times(1)).changeComment(1, 1, "Changed comment Text1");
-    }
-
-    @Test
     void deletePost_shouldDeletePostAndRedirect() throws Exception {
         doNothing().when(postService).deletePost(1);
 
@@ -193,19 +142,5 @@ public class PostControllerWebLayerTest {
                 .andExpect(redirectedUrl("/feed"));
 
         verify(postService, times(1)).deletePost(1);
-    }
-
-    @Test
-    void deleteComment_shouldDeleteCommentAndRedirect() throws Exception {
-        when(postService.deleteComment(1, 1))
-                .thenReturn(
-                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"));
-
-        mockMvc.perform(post("/feed/post/1/removeComment/1")
-                        .param("_method", "delete"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/feed/post/1"));
-
-        verify(postService, times(1)).deleteComment(1, 1);
     }
 }

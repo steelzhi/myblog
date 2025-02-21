@@ -25,14 +25,6 @@ public class PostService {
         return postRepository.addPostDto(PostMapper.mapToPostRequestDto(post));
     }
 
-    public PostResponseDto addLike(int id) {
-        return postRepository.addLike(id);
-    }
-
-    public PostResponseDto addComment(int postId, Comment comment) {
-        return postRepository.addComment(postId, comment.getText());
-    }
-
     public List<PostResponseDto> getSortedFeed() {
         return postRepository.getSortedFeed();
     }
@@ -55,20 +47,8 @@ public class PostService {
         return postRepository.changePost(PostMapper.mapToPostRequestDto(changedPost));
     }
 
-    public PostResponseDto changeComment(int id, int postId, String text) {
-        return postRepository.changeComment(id, postId, text);
-    }
-
     public void deletePost(int id) {
         postRepository.deletePost(id);
-    }
-
-    public PostResponseDto deleteComment(int postDtoId, int commentId) {
-        return postRepository.deleteComment(postDtoId, commentId);
-    }
-
-    public byte[] getImage(int postDtoId) {
-        return postRepository.getImage(postDtoId);
     }
 
     private String mapListTextsToString(List<String> tagsTextList) {

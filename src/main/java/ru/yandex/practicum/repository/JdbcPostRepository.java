@@ -1,10 +1,7 @@
 package ru.yandex.practicum.repository;
 
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.*;
-import org.thymeleaf.util.StringUtils;
 import ru.yandex.practicum.dto.PostResponseDto;
 import ru.yandex.practicum.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +16,8 @@ import java.util.stream.Collectors;
 
 @Repository
 @Primary
-public class JdbcBlogRepository implements PostRepository {
-    RowMapper<PostResponseDto> MAP_TO_POSTRESPONSEDTO = (ResultSet resultSet, int rowNum) -> new PostResponseDto(
+public class JdbcPostRepository implements PostRepository {
+    private RowMapper<PostResponseDto> MAP_TO_POSTRESPONSEDTO = (ResultSet resultSet, int rowNum) -> new PostResponseDto(
             resultSet.getInt("id"),
             resultSet.getString("name"),
             resultSet.getBytes("image"),
@@ -28,30 +25,28 @@ public class JdbcBlogRepository implements PostRepository {
             resultSet.getInt("number_of_likes"),
             null);
 
-    RowMapper<Comment> MAP_TO_COMMENTS = (ResultSet resultSet, int rowNum) -> new Comment(
+    private RowMapper<Comment> MAP_TO_COMMENTS = (ResultSet resultSet, int rowNum) -> new Comment(
             resultSet.getInt("id"),
             resultSet.getInt("post_id"),
             resultSet.getString("text"));
 
-    RowMapper<Tag> MAP_TO_TAG = (ResultSet resultSet, int rowNum) -> new Tag(
+    private RowMapper<Tag> MAP_TO_TAG = (ResultSet resultSet, int rowNum) -> new Tag(
             resultSet.getInt("id"),
             resultSet.getString("text"));
 
-    RowMapper<Integer> MAP_TO_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+    private RowMapper<Integer> MAP_TO_ID = (ResultSet resultSet, int rowNum) -> new Integer(
             resultSet.getInt("id"));
 
-    RowMapper<Integer> MAP_TO_TAG_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+    private RowMapper<Integer> MAP_TO_TAG_ID = (ResultSet resultSet, int rowNum) -> new Integer(
             resultSet.getInt("tag_id"));
 
-    RowMapper<Integer> MAP_TO_POST_ID = (ResultSet resultSet, int rowNum) -> new Integer(
+    private RowMapper<Integer> MAP_TO_POST_ID = (ResultSet resultSet, int rowNum) -> new Integer(
             resultSet.getInt("post_id"));
 
-    RowMapper<String> MAP_TO_TEXT = (ResultSet resultSet, int rowNum) -> new String(
+    private RowMapper<String> MAP_TO_TEXT = (ResultSet resultSet, int rowNum) -> new String(
             resultSet.getString("text"));
 
-    RowMapper<byte[]> MAP_TO_IMAGE = (ResultSet resultSet, int rowNum) -> resultSet.getBytes("image");
-
-    RowMapper<PostTag> MAP_TO_POST_TAG = (ResultSet resultSet, int rowNum) -> new PostTag(
+    private RowMapper<PostTag> MAP_TO_POST_TAG = (ResultSet resultSet, int rowNum) -> new PostTag(
             resultSet.getInt("id"),
             resultSet.getInt("post_id"),
             resultSet.getInt("tag_id"));
@@ -79,29 +74,6 @@ public class JdbcBlogRepository implements PostRepository {
         postRequestDto.setId(postId);
         addNewTags(postResponseDto);
         return postResponseDto;
-    }
-
-    @Override
-    public PostResponseDto addLike(int postId) {
-        jdbcTemplate.update("""
-                        UPDATE posts 
-                        SET number_of_likes = number_of_likes + 1
-                        WHERE id = ?
-                        """,
-                postId
-        );
-
-        return getPostById(postId);
-    }
-
-    @Override
-    public PostResponseDto addComment(int postId, String commentText) {
-        jdbcTemplate.update("""
-                INSERT INTO comments (post_id, text) 
-                VALUES (?, ?)
-                """, postId, commentText);
-
-        return getPostById(postId);
     }
 
     @Override
@@ -215,17 +187,6 @@ public class JdbcBlogRepository implements PostRepository {
     }
 
     @Override
-    public PostResponseDto changeComment(int id, int postId, String text) {
-        jdbcTemplate.update("""
-                UPDATE comments 
-                SET text = ? 
-                WHERE id = ? 
-                    AND post_id = ?
-                """, text, id, postId);
-        return getPostById(postId);
-    }
-
-    @Override
     public void deletePost(int id) {
         jdbcTemplate.update("""
                 DELETE FROM posts 
@@ -259,41 +220,19 @@ public class JdbcBlogRepository implements PostRepository {
         return tagsTextList;
     }
 
-    @Override
-    public PostResponseDto deleteComment(int postDtoId, int commentId) {
-        jdbcTemplate.update("""
-                DELETE FROM comments
-                WHERE id = ?
-                """, commentId);
-        return getPostById(postDtoId);
-    }
-
-    @Override
-    public byte[] getImage(int postDtoId) {
-        PreparedStatementCreator psc = con -> {
-            PreparedStatement selectPost = con.prepareStatement("""
-                    SELECT image 
-                    FROM posts 
-                    WHERE id = ?
-                    """);
-            selectPost.setInt(1, postDtoId);
-
-            return selectPost;
-        };
-
-        byte[] image = jdbcTemplate.query(psc, MAP_TO_IMAGE).getFirst();
-        return image;
-    }
-
     // Метод для тестирования (зачищаем БД из объектной модели)
     @Override
-    public void cleanAllDataBase() {
+    public void cleanAllPosts() {
         jdbcTemplate.execute("DELETE FROM posts_tags");
         jdbcTemplate.execute("DELETE FROM comments");
         jdbcTemplate.execute("DELETE FROM posts");
         jdbcTemplate.execute("DELETE FROM tags");
     }
 
+    /*
+     * Если в этой мапе поменять местами ключ и значение, это усложнит метод addTagsToPostDtos,
+     * который использует ключ из этой мапы для поиска в таблице связей
+     */
     private Map<Integer, String> getTagsMap() {
         List<Tag> tagList = jdbcTemplate.query(
                 """

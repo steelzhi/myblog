@@ -34,7 +34,7 @@ public class ImageControllerAllLayersTest {
     @AfterEach
     public void setUp() {
         // Очистка базы данных перед каждым тестом
-        postRepository.cleanAllDataBase();
+        postRepository.cleanAllPosts();
     }
 
     @Test

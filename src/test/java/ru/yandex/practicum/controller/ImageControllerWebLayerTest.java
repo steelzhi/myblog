@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.service.CommentService;
+import ru.yandex.practicum.service.ImageService;
+import ru.yandex.practicum.service.LikeService;
 import ru.yandex.practicum.service.PostService;
 
 import java.io.IOException;
@@ -17,13 +20,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
-@WebMvcTest
+@WebMvcTest(ImageController.class)
 public class ImageControllerWebLayerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private PostService postService;
+    private ImageService imageService;
 
     private static byte[] image;
 
@@ -34,13 +37,13 @@ public class ImageControllerWebLayerTest {
 
     @Test
     void getImage_shouldReturnImage() throws Exception {
-        when(postService.getImage(1))
+        when(imageService.getImage(1))
                 .thenReturn(image);
 
         mockMvc.perform(get("/1/image"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/octet-stream"));
 
-        verify(postService, times(1)).getImage(1);
+        verify(imageService, times(1)).getImage(1);
     }
 }

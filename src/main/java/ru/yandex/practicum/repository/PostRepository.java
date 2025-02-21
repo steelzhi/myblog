@@ -9,10 +9,6 @@ import java.util.List;
 public interface PostRepository {
     PostResponseDto addPostDto(PostRequestDto postDto);
 
-    PostResponseDto addLike(int postDtoId);
-
-    PostResponseDto addComment(int postId, String commentText);
-
     List<PostResponseDto> getSortedFeed();
 
     List<PostResponseDto> getFeedWithChosenTags(String tagsString) throws SQLException;
@@ -23,13 +19,7 @@ public interface PostRepository {
 
     PostResponseDto changePost(PostRequestDto newPostDto);
 
-    PostResponseDto changeComment(int id, int postId, String text);
-
     void deletePost(int id);
 
-    PostResponseDto deleteComment(int postDtoId, int commentId);
-
-    byte[] getImage(int postDtoId);
-
-    void cleanAllDataBase();
+    void cleanAllPosts();
 }

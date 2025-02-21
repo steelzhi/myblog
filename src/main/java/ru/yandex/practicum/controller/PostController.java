@@ -27,20 +27,6 @@ public class PostController {
         return "redirect:/feed";
     }
 
-    @PostMapping("/post/{id}/addLike")
-    public String addLike(@PathVariable(name = "id") int id) {
-        postService.addLike(id);
-
-        return "redirect:/feed/post/" + id;
-    }
-
-    @PostMapping("/post/{id}/addComment")
-    public String addComment(@PathVariable(name = "id") int id, @ModelAttribute Comment comment) {
-        postService.addComment(id, comment);
-
-        return "redirect:/feed/post/" + id;
-    }
-
     @GetMapping
     public String getFeed(Model model) {
         List<PostResponseDto> feed = postService.getSortedFeed();
@@ -86,27 +72,11 @@ public class PostController {
         return "redirect:/feed/post/" + id;
     }
 
-    @PostMapping(value = "/post/comment")
-    public String changeComment(@RequestParam(name = "id") int id,
-                                @RequestParam(name = "postId") int postId,
-                                @RequestParam(name = "text") String text) {
-        postService.changeComment(id, postId, text);
-        return "redirect:/feed/post/" + postId;
-    }
-
     @PostMapping(value = "/post/{id}", params = "_method=delete")
     public String deletePost(@PathVariable(name = "id") int id) {
         postService.deletePost(id);
         List<PostResponseDto> feed = postService.getSortedFeed();
 
         return "redirect:/feed";
-    }
-
-    @PostMapping(value = "/post/{id}/removeComment/{commentId}", params = "_method=delete")
-    public String deleteComment(@PathVariable(name = "id") int id,
-                                @PathVariable(name = "commentId") int commentId) {
-        postService.deleteComment(id, commentId);
-
-        return "redirect:/feed/post/" + id;
     }
 }
