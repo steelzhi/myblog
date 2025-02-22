@@ -35,9 +35,6 @@ public class CommentServiceWithMockedRepoTest {
     @MockitoBean
     CommentRepository commentRepository;
 
-    public CommentServiceWithMockedRepoTest() throws IOException {
-    }
-
     @BeforeEach
     void setUp() {
         Mockito.reset(postRepository);
@@ -69,7 +66,8 @@ public class CommentServiceWithMockedRepoTest {
         assertTrue(postDtoWithComment.getCommentsList().contains(comment), "Comment comment);\n" +
                 "        assertTrue(postDtoWithComment != null, \"Post wasn't added");
 
-        Mockito.verify(commentRepository, times(2)).addComment(mockPostDtoWithoutComment.getId(), comment.getText());
+        Mockito.verify(commentRepository, times(2))
+                .addComment(mockPostDtoWithoutComment.getId(), comment.getText());
         Mockito.verify(postRepository, times(1)).getPostById(mockPostDtoWithComment.getId());
     }
 

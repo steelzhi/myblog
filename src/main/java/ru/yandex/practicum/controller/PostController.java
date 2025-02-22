@@ -1,5 +1,6 @@
 package ru.yandex.practicum.controller;
 
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,17 +31,6 @@ public class PostController {
         return "redirect:/feed";
     }
 
-    @GetMapping
-    public String getFeed(Model model) {
-        List<PostResponseDto> feedSplittedWith10PostsOnPage = postService.getFeedSplittedByPages(POSTS_ON_PAGE_DEFAULT, PAGE_NUMBER_FIRST);
-        int feedFullSize = postService.getSortedFeed().size();
-        Pages pages = new Pages(POSTS_ON_PAGE_DEFAULT, (feedFullSize - 1) / POSTS_ON_PAGE_DEFAULT + 1);
-        model.addAttribute("feed", feedSplittedWith10PostsOnPage);
-        model.addAttribute("pages", pages);
-
-        return "feed";
-    }
-
     @GetMapping("/tags/")
     public String getFeedWithChosenTags(@RequestParam(name = "tagsString") String tagsString, Model model) throws SQLException {
         List<PostResponseDto> feedWithChosenTags = postService.getFeedWithChosenTags(tagsString);
@@ -57,12 +47,16 @@ public class PostController {
         return "post";
     }
 
-    @GetMapping("/pages/{postsOnPage}/{pageNumber}")
-    public String getFeedSplittedByPages(@PathVariable(name = "postsOnPage") int postsOnPage,
-                                         @PathVariable(name = "pageNumber") int pageNumber,
+    @GetMapping
+    public String getFeedSplittedByPages(@RequestParam(name = "postsOnPage", required = false) Integer postsOnPage,
+                                         @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
                                          Model model) {
+        if (postsOnPage == null) {
+            postsOnPage = POSTS_ON_PAGE_DEFAULT;
+            pageNumber = PAGE_NUMBER_FIRST;
+        }
         List<PostResponseDto> feedSplittedByPages = postService.getFeedSplittedByPages(postsOnPage, pageNumber);
-        int feedFullSize = postService.getSortedFeed().size();
+        int feedFullSize = postService.getFeedSize();
         Pages pages = new Pages(postsOnPage, (feedFullSize - 1) / postsOnPage + 1);
         model.addAttribute("feed", feedSplittedByPages);
         model.addAttribute("pages", pages);
@@ -81,7 +75,6 @@ public class PostController {
     @PostMapping(value = "/post/{id}", params = "_method=delete")
     public String deletePost(@PathVariable(name = "id") int id) {
         postService.deletePost(id);
-        List<PostResponseDto> feed = postService.getSortedFeed();
 
         return "redirect:/feed";
     }

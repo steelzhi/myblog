@@ -59,24 +59,6 @@ public class PostServiceWithMockedRepoTest {
     }
 
     @Test
-    void testGetSortedFeed() {
-        PostResponseDto mockPostDto1WithId
-                = new PostResponseDto(1, "Post1", null, "Text1", 0, "#Tag1");
-        PostResponseDto mockPostDto2WithId
-                = new PostResponseDto(2, "Post2", null, "Text2", 0, "#Tag2");
-        Mockito.when(postRepository.getSortedFeed())
-                .thenReturn(List.of(mockPostDto2WithId, mockPostDto1WithId));
-
-        List<PostResponseDto> sortedFeed = postService.getSortedFeed();
-        assertTrue(!sortedFeed.isEmpty(), "Posts weren't added");
-        assertTrue(sortedFeed.size() == 2, "Number of posts is incorrect");
-        assertEquals(sortedFeed.get(0), mockPostDto2WithId, "Wrong sequence of posts in feed");
-        assertEquals(sortedFeed.get(1), mockPostDto1WithId, "Wrong sequence of posts in feed");
-
-        Mockito.verify(postRepository, times(1)).getSortedFeed();
-    }
-
-    @Test
     void testGetFeedWithChosenTags() throws SQLException {
         String tagString1 = "#Tag1";
         String tagString2 = "#Tag2";

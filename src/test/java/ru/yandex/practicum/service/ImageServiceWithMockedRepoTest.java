@@ -33,9 +33,6 @@ public class ImageServiceWithMockedRepoTest {
     @MockitoBean
     ImageRepository imageRepository;
 
-    public ImageServiceWithMockedRepoTest() throws IOException {
-    }
-
     @BeforeEach
     void setUp() {
         Mockito.reset(postRepository);

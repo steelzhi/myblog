@@ -9,8 +9,6 @@ import java.util.List;
 public interface PostRepository {
     PostResponseDto addPostDto(PostRequestDto postDto);
 
-    List<PostResponseDto> getSortedFeed();
-
     List<PostResponseDto> getFeedWithChosenTags(String tagsString) throws SQLException;
 
     PostResponseDto getPostById(int id);
@@ -22,6 +20,8 @@ public interface PostRepository {
     void deletePost(int id);
 
     void cleanAllPosts();
+
+    int getFeedSize();
 
     void cleanTagsMap();
 }

@@ -60,24 +60,6 @@ public class PostControllerAllLayersTest {
     }
 
     @Test
-    void getFeed_shouldReturnHtmlWithFeed() throws Exception {
-        PostRequestDto postDto1
-                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
-        PostRequestDto postDto2
-                = new PostRequestDto(2, "Post2", null, "Text2", "#Tag2");
-        postRepository.addPostDto(postDto1);
-        postRepository.addPostDto(postDto2);
-
-        mockMvc.perform(get("/feed"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("feed"))
-                .andExpect(model().attributeExists("feed"))
-                .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
-                .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
-    }
-
-    @Test
     void getFeedWithChosenTags_shouldReturnHtmlWithFeedWithChosenTags() throws Exception {
         PostRequestDto postDto1
                 = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
@@ -110,7 +92,7 @@ public class PostControllerAllLayersTest {
     }
 
     @Test
-    void getFeedSplittedByPages_shouldReturnFeedSplittedBy2Pages() throws Exception {
+    void getFeedSplittedByPagesWithPageParams_shouldReturnFeedSplittedBy2Pages() throws Exception {
         PostRequestDto postDto1
                 = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
         PostRequestDto postDto2
@@ -121,14 +103,36 @@ public class PostControllerAllLayersTest {
         postRepository.addPostDto(postDto2);
         postRepository.addPostDto(postDto3);
 
-        mockMvc.perform(get("/feed/pages/2/1"))
+        mockMvc.perform(get("/feed")
+                        .param("postsOnPage", "2")
+                        .param("pageNumber", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("feed"))
                 .andExpect(model().attributeExists("feed"))
                 .andExpect(xpath("//table/tbody/tr").nodeCount(2 * 7))
                 .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
+    }
 
+    @Test
+    void getFeedSplittedByPagesWithoutPageParams_shouldReturnFeed() throws Exception {
+        PostRequestDto postDto1
+                = new PostRequestDto(1, "Post1", null, "Text1", "#Tag1");
+        PostRequestDto postDto2
+                = new PostRequestDto(2, "Post2", null, "Text2", "#Tag2");
+        PostRequestDto postDto3
+                = new PostRequestDto(3, "Post3", null, "Text3", "#Tag3");
+        postRepository.addPostDto(postDto1);
+        postRepository.addPostDto(postDto2);
+        postRepository.addPostDto(postDto3);
+
+        mockMvc.perform(get("/feed"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("text/html;charset=UTF-8"))
+                .andExpect(view().name("feed"))
+                .andExpect(model().attributeExists("feed"))
+                .andExpect(xpath("//table/tbody/tr").nodeCount(3 * 7))
+                .andExpect(xpath("//table/tbody/tr[1]/td[1]").exists());
     }
 
     @Test
@@ -158,7 +162,7 @@ public class PostControllerAllLayersTest {
                         .param("_method", "delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed"));
-        List<PostResponseDto> postDtoList = postRepository.getSortedFeed();
-        assertTrue(postDtoList.isEmpty(), "Post was removedIncorrectly");
+        int feedSize = postRepository.getFeedSize();
+        assertTrue(feedSize == 0, "Post was removedIncorrectly");
     }
 }

@@ -65,14 +65,6 @@ public class PostRepositoryTest {
     }
 
     @Test
-    void getSortedFeed_shouldReturnSortedFeed() {
-        List<PostResponseDto> feed = postRepository.getSortedFeed();
-        assertEquals(feed.size(), 3, "Feed should contain 3 posts");
-        PostResponseDto postDto3 = postRepository.getPostById(3);
-        assertEquals(feed.get(0), postDto3, "Post 3 should be the first in feed");
-    }
-
-    @Test
     void getFeedWithChosenTags_shouldReturnFeedWithChosenTags() throws SQLException {
         String tagString1 = "('#Tag1')";
         String tagString2 = "('#CommonTag','#Tag2')";
@@ -130,7 +122,7 @@ public class PostRepositoryTest {
     void deletePost_shouldDeletePost() {
         PostResponseDto postDto1 = postRepository.getPostById(1);
         postRepository.deletePost(postDto1.getId());
-        List<PostResponseDto> feedWithoutPost1 = postRepository.getSortedFeed();
+        List<PostResponseDto> feedWithoutPost1 = postRepository.getFeedSplittedByPages(10, 1);
         assertFalse(feedWithoutPost1.contains(postDto1), "Feed shouldn't contain post 1");
         assertTrue(feedWithoutPost1.size() == 2, "Feed should contain only 2 posts");
     }

@@ -128,22 +128,29 @@
     </tbody>
 </table>
 
-<form th:action="@{/feed/pages/2/1}">
+<form th:action="@{/feed}">
+    <input type="hidden" name="postsOnPage" value="2"/>
+    <input type="hidden" name="pageNumber" value="1"/>
     <button type="submit">Показывать по 2 поста</button>
 </form>
 
-<form th:action="@{/feed/pages/10/1}">
+<form th:action="@{/feed}">
+    <input type="hidden" name="postsOnPage" value="10"/>
+    <input type="hidden" name="pageNumber" value="1"/>
     <button type="submit">Показывать по 10 постов</button>
 </form>
 
-<form th:action="@{/feed/pages/20/1}">
+<form th:action="@{/feed}">
+    <input type="hidden" name="postsOnPage" value="20"/>
+    <input type="hidden" name="pageNumber" value="1"/>
     <button type="submit">Показывать по 20 постов</button>
 </form>
 
-<form th:action="@{/feed/pages/50/1}">
+<form th:action="@{/feed}">
+    <input type="hidden" name="postsOnPage" value="50"/>
+    <input type="hidden" name="pageNumber" value="1"/>
     <button type="submit">Показывать по 50 постов</button>
 </form>
-
 
 <div th:if="${pages != null}">
     <br/>
@@ -151,7 +158,7 @@
     <br/>
 
     <p th:each="i : ${#numbers.sequence(1, {pages.numberOfPages}, 1)}">
-        <a th:href="@{/feed/pages/{postsOnPage}/{i}(postsOnPage=${pages.postsOnPage}, i=${i})}" th:text="${i} "></a>
+        <a th:href="@{/feed(postsOnPage=${pages.postsOnPage},pageNumber=${i})}" th:text="${i} "></a>
     </p>
 </div>
 

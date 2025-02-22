@@ -36,7 +36,7 @@ public class PostControllerWebLayerTest {
     void addPostDto_shouldAddPostDtoToDatabaseAndRedirect() throws Exception {
         PostResponseDto postDto = new PostResponseDto(1, "Post", null, "Text", 0, "Tag");
         Mockito.when(postService.addPost(any(Post.class)))
-                        .thenReturn(postDto);
+                .thenReturn(postDto);
 
         mockMvc.perform(post("/feed")
                         .param("id", "0")
@@ -47,23 +47,6 @@ public class PostControllerWebLayerTest {
                 .andExpect(redirectedUrl("/feed"));
 
         verify(postService, times(1)).addPost(any(Post.class));
-    }
-
-    @Test
-    void getFeed_shouldReturnHtmlWithFeed() throws Exception {
-        when(postService.getSortedFeed())
-                .thenReturn(List.of(
-                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"),
-                        new PostResponseDto(2, "Post2", null, "Text2", 1, "Tag2")));
-
-        mockMvc.perform(get("/feed"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("feed"))
-                .andExpect(model().attributeExists("feed"))
-                .andExpect(model().attributeExists("pages"));
-
-        verify(postService, times(1)).getSortedFeed();
     }
 
     @Test
@@ -106,7 +89,9 @@ public class PostControllerWebLayerTest {
                         new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"),
                         new PostResponseDto(2, "Post2", null, "Text2", 1, "Tag2")));
 
-        mockMvc.perform(get("/feed/pages/2/1"))
+        mockMvc.perform(get("/feed")
+                        .param("postsOnPage", "2")
+                        .param("pageNumber", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("feed"))
@@ -121,8 +106,8 @@ public class PostControllerWebLayerTest {
     @Test
     void changePost_shouldChangePostAndRedirect() throws Exception {
         when(postService.changePost(any(Post.class)))
-                .thenReturn(
-                        new PostResponseDto(1, "Changed Post1", null, "Changed Text1", 1, "Changed Tag1"));
+                .thenReturn(new PostResponseDto(
+                        1, "Changed Post1", null, "Changed Text1", 1, "Changed Tag1"));
         mockMvc.perform(post("/feed/post/1/change")
                         .param("name", "Changed Post1")
                         .param("text", "Changed Text1"))

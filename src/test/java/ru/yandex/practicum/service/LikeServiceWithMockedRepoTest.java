@@ -36,9 +36,6 @@ public class LikeServiceWithMockedRepoTest {
     @MockitoBean
     LikeRepository likeRepository;
 
-    public LikeServiceWithMockedRepoTest() throws IOException {
-    }
-
     @BeforeEach
     void setUp() {
         Mockito.reset(postRepository);

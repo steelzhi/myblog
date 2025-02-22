@@ -25,8 +25,8 @@ public class PostService {
         return postRepository.addPostDto(PostMapper.mapToPostRequestDto(post));
     }
 
-    public List<PostResponseDto> getSortedFeed() {
-        return postRepository.getSortedFeed();
+    public int getFeedSize() {
+        return postRepository.getFeedSize();
     }
 
     public List<PostResponseDto> getFeedWithChosenTags(String tagsString) throws SQLException {

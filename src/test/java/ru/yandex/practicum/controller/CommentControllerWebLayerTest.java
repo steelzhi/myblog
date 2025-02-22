@@ -42,7 +42,7 @@ public class CommentControllerWebLayerTest {
                 .thenReturn(postDtoWithComment);
 
         mockMvc.perform(post("/feed/post/1/addComment")
-                .param("text", "new comment"))
+                        .param("text", "new comment"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
@@ -59,21 +59,20 @@ public class CommentControllerWebLayerTest {
         when(commentService.changeComment(1, 1, "Changed comment Text1"))
                 .thenReturn(postDtoWithChangedComment);
 
-        mockMvc.perform(post("/feed/post/comment")
-                        .param("id", "1")
-                        .param("postId", "1")
+        mockMvc.perform(post("/feed/post/1/comment/1")
                         .param("text", "Changed comment Text1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));
 
-        verify(commentService, times(1)).changeComment(1, 1, "Changed comment Text1");
+        verify(commentService, times(1))
+                .changeComment(1, 1, "Changed comment Text1");
     }
 
     @Test
     void deleteComment_shouldDeleteCommentAndRedirect() throws Exception {
         when(commentService.deleteComment(1, 1))
-                .thenReturn(
-                        new PostResponseDto(1, "Post1", null, "Text1", 1, "Tag1"));
+                .thenReturn(new PostResponseDto(
+                        1, "Post1", null, "Text1", 1, "Tag1"));
 
         mockMvc.perform(post("/feed/post/1/removeComment/1")
                         .param("_method", "delete"))

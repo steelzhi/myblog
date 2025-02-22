@@ -83,15 +83,6 @@ public class JdbcPostRepository implements PostRepository {
     }
 
     @Override
-    public List<PostResponseDto> getSortedFeed() {
-        List<PostResponseDto> postDtosList = jdbcTemplate.query("""
-                SELECT id, name, image, text, number_of_likes 
-                FROM posts p
-                """, MAP_TO_POSTRESPONSEDTO);
-        return getPostResponseDtoListWithCommentsAndTags(postDtosList);
-    }
-
-    @Override
     public List<PostResponseDto> getFeedWithChosenTags(String tagsInString) {
         PreparedStatementCreator psc = con -> {
             String[] tagArray = tagsInString.substring(2, tagsInString.length() - 2).split("','");
@@ -200,6 +191,23 @@ public class JdbcPostRepository implements PostRepository {
                 """, id);
     }
 
+    @Override
+    public int getFeedSize() {
+        return jdbcTemplate.queryForObject("""
+                SELECT COUNT(id) 
+                FROM posts
+                """, Integer.class);
+    }
+
+    // Метод для тестирования (зачищаем БД из объектной модели)
+    @Override
+    public void cleanAllPosts() {
+        jdbcTemplate.execute("DELETE FROM posts_tags");
+        jdbcTemplate.execute("DELETE FROM comments");
+        jdbcTemplate.execute("DELETE FROM posts");
+        jdbcTemplate.execute("DELETE FROM tags");
+    }
+
     private List<String> getAllTagsTextForPost(int postId) {
         List<String> tagsTextList = new ArrayList<>();
         List<PostTag> postsTagsList = getPostsTagsList();
@@ -224,15 +232,6 @@ public class JdbcPostRepository implements PostRepository {
         }
 
         return tagsTextList;
-    }
-
-    // Метод для тестирования (зачищаем БД из объектной модели)
-    @Override
-    public void cleanAllPosts() {
-        jdbcTemplate.execute("DELETE FROM posts_tags");
-        jdbcTemplate.execute("DELETE FROM comments");
-        jdbcTemplate.execute("DELETE FROM posts");
-        jdbcTemplate.execute("DELETE FROM tags");
     }
 
     /*

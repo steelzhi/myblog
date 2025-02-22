@@ -74,9 +74,7 @@ public class CommentControllerAllLayersTest {
         Comment comment = new Comment(1, 1, "new comment");
         commentRepository.addComment(1, comment.getText());
 
-        mockMvc.perform(post("/feed/post/comment")
-                        .param("id", "1")
-                        .param("postId", "1")
+        mockMvc.perform(post("/feed/post/1/comment/1")
                         .param("text", "Changed comment Text1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/feed/post/1"));

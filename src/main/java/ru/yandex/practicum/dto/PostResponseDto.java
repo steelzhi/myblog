@@ -13,6 +13,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 public class PostResponseDto {
+    public static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
     private int id;
     private String name;
     private byte[] image;
@@ -21,7 +22,6 @@ public class PostResponseDto {
     private int numberOfLikes;
     private List<String> tagsTextList;
     private List<Comment> commentsList = new ArrayList<>();
-    public static final int TEXT_MAX_LENGTH_FOR_PREVIEW = 5;
 
     public PostResponseDto(int id, String name, byte[] image, String text, int numberOfLikes, String tagsString) {
         this.id = id;

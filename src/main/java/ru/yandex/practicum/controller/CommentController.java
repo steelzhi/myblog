@@ -28,9 +28,9 @@ public class CommentController {
         return "redirect:/feed/post/" + id;
     }
 
-    @PostMapping(value = "/post/comment")
-    public String changeComment(@RequestParam(name = "id") int id,
-                                @RequestParam(name = "postId") int postId,
+    @PostMapping(value = "/post/{postId}/comment/{id}")
+    public String changeComment(@PathVariable(name = "postId") int postId,
+                                @PathVariable(name = "id") int id,
                                 @RequestParam(name = "text") String text) {
         commentService.changeComment(id, postId, text);
         return "redirect:/feed/post/" + postId;
